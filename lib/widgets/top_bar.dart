@@ -11,33 +11,130 @@ class TopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 56,
-      color: AppColors.header,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        children: [
-          _Logo(),
-          const SizedBox(width: 28),
-          Row(
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Top utility bar
+        Container(
+          height: 32,
+          color: AppColors.headerTop,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Row(
             children: [
-              _NavTab('⚽ Спорт',   0, currentPage, onPageChanged),
-              _NavTab('🔴 Лайв',    1, currentPage, onPageChanged),
-              _NavTab('👤 Профайл', 2, currentPage, onPageChanged),
+              _MiniLink(Icons.phone_iphone, 'MOBILE'),
+              _MiniLink(Icons.notifications_none, 'МЭДЭГДЭЛ'),
+              _MiniLink(Icons.bar_chart, 'СТАТИСТИК'),
+              const Spacer(),
+              const Text('30 days bonus',
+                  style: TextStyle(color: AppColors.orange, fontSize: 11, fontWeight: FontWeight.w600)),
+              const SizedBox(width: 16),
+              _LangChip('🇲🇳 MN'),
+              const SizedBox(width: 8),
+              _AuthBtn('Нэвтрэх', AppColors.surfaceHov, Colors.white),
+              const SizedBox(width: 6),
+              _AuthBtn('Бүртгүүлэх', AppColors.accent, Colors.white),
             ],
           ),
-          const Spacer(),
-          Consumer<BetProvider>(
-            builder: (_, p, __) => _BalanceChip(balance: p.balance, connected: p.backendConnected),
+        ),
+        // Main nav bar with logo and tabs
+        Container(
+          height: 52,
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [AppColors.blueDark, AppColors.blue],
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+            ),
           ),
-          const SizedBox(width: 10),
-          Consumer<BetProvider>(
-            builder: (_, p, __) => p.betCount > 0
-                ? _SlipBadge(count: p.betCount)
-                : const SizedBox.shrink(),
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: Row(
+            children: [
+              _Logo(),
+              const SizedBox(width: 18),
+              Expanded(
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      _NavTab('СПОРТ',     0, currentPage, onPageChanged),
+                      _NavTab('ЛАЙВ',      1, currentPage, onPageChanged),
+                      _NavTab('ЭСПОРТ',    0, currentPage, onPageChanged),
+                      _NavTab('КАЗИНО',    0, currentPage, onPageChanged),
+                      _NavTab('LIVE CASINO', 0, currentPage, onPageChanged),
+                      _NavTab('ПРОМО',     0, currentPage, onPageChanged),
+                      _NavTab('TV ТОГЛООМ', 0, currentPage, onPageChanged),
+                      _NavTab('БИНГО',     0, currentPage, onPageChanged),
+                      _NavTab('TOTO',      0, currentPage, onPageChanged),
+                      _NavTab('ҮР ДҮН',    0, currentPage, onPageChanged),
+                      _NavTab('ПРОФАЙЛ',   2, currentPage, onPageChanged),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Consumer<BetProvider>(
+                builder: (_, p, __) => _BalanceChip(balance: p.balance, connected: p.backendConnected),
+              ),
+              const SizedBox(width: 8),
+              Consumer<BetProvider>(
+                builder: (_, p, __) => p.betCount > 0
+                    ? _SlipBadge(count: p.betCount)
+                    : const SizedBox.shrink(),
+              ),
+            ],
           ),
+        ),
+      ],
+    );
+  }
+}
+
+class _MiniLink extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  const _MiniLink(this.icon, this.label);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 16),
+      child: Row(
+        children: [
+          Icon(icon, size: 13, color: AppColors.textSecondary),
+          const SizedBox(width: 4),
+          Text(label, style: const TextStyle(color: AppColors.textSecondary, fontSize: 11)),
         ],
       ),
+    );
+  }
+}
+
+class _LangChip extends StatelessWidget {
+  final String label;
+  const _LangChip(this.label);
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceHov,
+        borderRadius: BorderRadius.circular(3),
+      ),
+      child: Text(label, style: const TextStyle(color: Colors.white, fontSize: 11)),
+    );
+  }
+}
+
+class _AuthBtn extends StatelessWidget {
+  final String label;
+  final Color bg, fg;
+  const _AuthBtn(this.label, this.bg, this.fg);
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(3)),
+      child: Text(label, style: TextStyle(color: fg, fontSize: 11, fontWeight: FontWeight.w600)),
     );
   }
 }
@@ -48,19 +145,26 @@ class _Logo extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Container(
-          width: 30,
-          height: 30,
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(colors: [AppColors.orange, AppColors.liveRed]),
-            borderRadius: BorderRadius.circular(7),
-          ),
-          child: const Icon(Icons.sports_soccer, color: Colors.white, size: 16),
+        const Text(
+          'Sport',
+          style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: -0.5),
         ),
-        const SizedBox(width: 8),
-        const Text('Sport', style: TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.bold)),
-        const Text('Bet', style: TextStyle(color: AppColors.orange, fontSize: 17, fontWeight: FontWeight.bold)),
-        const Text(' MN', style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: const Text(
+            'Bet',
+            style: TextStyle(color: Color(0xFFFFCC00), fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: -0.5),
+          ),
+        ),
+        Container(
+          margin: const EdgeInsets.only(left: 4),
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+          decoration: BoxDecoration(
+            color: AppColors.accent,
+            borderRadius: BorderRadius.circular(3),
+          ),
+          child: const Text('MN', style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold)),
+        ),
       ],
     );
   }
@@ -78,23 +182,18 @@ class _NavTab extends StatelessWidget {
     final active = idx == cur;
     return InkWell(
       onTap: () => onTap(idx),
-      borderRadius: BorderRadius.circular(4),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-        margin: const EdgeInsets.only(right: 2),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
         decoration: BoxDecoration(
-          color: active ? AppColors.orange.withOpacity(0.12) : Colors.transparent,
-          borderRadius: BorderRadius.circular(4),
-          border: active
-              ? const Border(bottom: BorderSide(color: AppColors.orange, width: 2))
-              : null,
+          color: active ? Colors.white.withOpacity(0.12) : Colors.transparent,
         ),
         child: Text(
           label,
           style: TextStyle(
-            color: active ? AppColors.orange : AppColors.textSecondary,
-            fontSize: 13,
-            fontWeight: active ? FontWeight.w600 : FontWeight.normal,
+            color: Colors.white,
+            fontSize: 12,
+            fontWeight: active ? FontWeight.w800 : FontWeight.w600,
+            letterSpacing: 0.3,
           ),
         ),
       ),
@@ -117,20 +216,19 @@ class _BalanceChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.border),
+        color: Colors.white.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(3),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.circle, size: 7, color: connected ? AppColors.green : AppColors.textMuted),
+          Icon(Icons.circle, size: 7, color: connected ? AppColors.accentLight : AppColors.textMuted),
           const SizedBox(width: 6),
           Text(
             '₮${_fmt(balance)}',
-            style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
+            style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w700),
           ),
         ],
       ),
@@ -145,8 +243,8 @@ class _SlipBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(color: AppColors.orange, borderRadius: BorderRadius.circular(16)),
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+      decoration: BoxDecoration(color: AppColors.accent, borderRadius: BorderRadius.circular(3)),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [

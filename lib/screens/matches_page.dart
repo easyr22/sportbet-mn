@@ -4,6 +4,7 @@ import '../constants/app_colors.dart';
 import '../models/sport_event.dart';
 import '../services/api_service.dart';
 import '../widgets/match_row.dart';
+import '../widgets/hero_banner.dart';
 
 class MatchesPage extends StatefulWidget {
   final String sportFilter;
@@ -95,9 +96,10 @@ class _MatchesPageState extends State<MatchesPage> {
       onRefresh: _load,
       child: ListView.builder(
         padding: EdgeInsets.zero,
-        itemCount: groups.length,
+        itemCount: groups.length + 1,
         itemBuilder: (_, i) {
-          final key = groups.keys.elementAt(i);
+          if (i == 0) return const HeroBanner();
+          final key = groups.keys.elementAt(i - 1);
           return _LeagueBlock(title: key, events: groups[key]!);
         },
       ),
@@ -126,16 +128,25 @@ class _LeagueBlockState extends State<_LeagueBlock> {
       InkWell(
         onTap: () => setState(() => _open = !_open),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-          decoration: const BoxDecoration(
-            color: AppColors.bg,
-            border: Border(bottom: BorderSide(color: AppColors.divider, width: 0.5)),
+          margin: const EdgeInsets.fromLTRB(10, 6, 10, 0),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [AppColors.blueDark, AppColors.surface],
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+            ),
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(6),
+              topRight: Radius.circular(6),
+            ),
+            border: const Border(left: BorderSide(color: AppColors.accent, width: 3)),
           ),
           child: Row(children: [
             Expanded(
               child: Text(widget.title,
                   style: const TextStyle(
-                      color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)),
+                      color: Colors.white, fontSize: 12, fontWeight: FontWeight.w700)),
             ),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
