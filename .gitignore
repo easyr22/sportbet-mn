@@ -2,7 +2,7 @@
 .dart_tool/
 .flutter-plugins
 .flutter-plugins-dependencies
-build/
+# build/  (keep build/web for Railway deployment)
 
 # Python
 __pycache__/
