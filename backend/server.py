@@ -31,32 +31,53 @@ ODDS_API_KEY   = os.environ.get("ODDS_API_KEY",   "")   # real bookmaker odds
 #  ESPN SPORT SOURCES  (API key хэрэггүй — бүгд үнэгүй)
 # ═══════════════════════════════════════════════════════
 ESPN_SOURCES = [
-    # ── Football ──────────────────────────────────────
+    # ── Football (Soccer) ─────────────────────────────
     {"path": "soccer/eng.1",          "sportId": "football",    "league": "Premier League",      "country": "Англи",      "flag": "🏴󠁧󠁢󠁥󠁮󠁧󠁿"},
     {"path": "soccer/eng.2",          "sportId": "football",    "league": "Championship",        "country": "Англи",      "flag": "🏴󠁧󠁢󠁥󠁮󠁧󠁿"},
+    {"path": "soccer/eng.fa",         "sportId": "football",    "league": "FA Cup",              "country": "Англи",      "flag": "🏴󠁧󠁢󠁥󠁮󠁧󠁿"},
     {"path": "soccer/esp.1",          "sportId": "football",    "league": "La Liga",             "country": "Испани",     "flag": "🇪🇸"},
+    {"path": "soccer/esp.copa_del_rey","sportId":"football",    "league": "Copa del Rey",        "country": "Испани",     "flag": "🇪🇸"},
     {"path": "soccer/ita.1",          "sportId": "football",    "league": "Serie A",             "country": "Итали",      "flag": "🇮🇹"},
     {"path": "soccer/ger.1",          "sportId": "football",    "league": "Bundesliga",          "country": "Герман",     "flag": "🇩🇪"},
+    {"path": "soccer/ger.2",          "sportId": "football",    "league": "Bundesliga 2",        "country": "Герман",     "flag": "🇩🇪"},
     {"path": "soccer/fra.1",          "sportId": "football",    "league": "Ligue 1",             "country": "Франц",      "flag": "🇫🇷"},
     {"path": "soccer/por.1",          "sportId": "football",    "league": "Primeira Liga",       "country": "Португал",   "flag": "🇵🇹"},
     {"path": "soccer/ned.1",          "sportId": "football",    "league": "Eredivisie",          "country": "Нидерланд",  "flag": "🇳🇱"},
     {"path": "soccer/tur.1",          "sportId": "football",    "league": "Süper Lig",           "country": "Турк",       "flag": "🇹🇷"},
+    {"path": "soccer/sco.1",          "sportId": "football",    "league": "Scottish Premiership","country": "Шотланд",    "flag": "🏴󠁧󠁢󠁳󠁣󠁴󠁿"},
+    {"path": "soccer/bel.1",          "sportId": "football",    "league": "Belgian Pro League",  "country": "Бельги",     "flag": "🇧🇪"},
+    {"path": "soccer/aut.1",          "sportId": "football",    "league": "Bundesliga (Aus)",    "country": "Австри",     "flag": "🇦🇹"},
+    {"path": "soccer/sui.1",          "sportId": "football",    "league": "Super League",        "country": "Швейцарь",   "flag": "🇨🇭"},
+    {"path": "soccer/gre.1",          "sportId": "football",    "league": "Super League 1",      "country": "Грек",       "flag": "🇬🇷"},
+    {"path": "soccer/rus.1",          "sportId": "football",    "league": "Premier League",      "country": "Орос",       "flag": "🇷🇺"},
     {"path": "soccer/mex.1",          "sportId": "football",    "league": "Liga MX",             "country": "Мексик",     "flag": "🇲🇽"},
     {"path": "soccer/arg.1",          "sportId": "football",    "league": "Primera División",    "country": "Аргентин",   "flag": "🇦🇷"},
     {"path": "soccer/bra.1",          "sportId": "football",    "league": "Série A",             "country": "Бразил",     "flag": "🇧🇷"},
     {"path": "soccer/jpn.1",          "sportId": "football",    "league": "J.League",            "country": "Япон",       "flag": "🇯🇵"},
+    {"path": "soccer/kor.1",          "sportId": "football",    "league": "K League 1",          "country": "Солонгос",   "flag": "🇰🇷"},
     {"path": "soccer/chn.1",          "sportId": "football",    "league": "Chinese Super League","country": "Хятад",      "flag": "🇨🇳"},
+    {"path": "soccer/aus.1",          "sportId": "football",    "league": "A-League",            "country": "Австрали",   "flag": "🇦🇺"},
     {"path": "soccer/usa.1",          "sportId": "football",    "league": "MLS",                 "country": "АНУ",        "flag": "🇺🇸"},
     {"path": "soccer/uefa.champions", "sportId": "football",    "league": "Champions League",    "country": "Европ",      "flag": "🌍"},
     {"path": "soccer/uefa.europa",    "sportId": "football",    "league": "Europa League",       "country": "Европ",      "flag": "🌍"},
+    {"path": "soccer/uefa.europa.conf","sportId":"football",    "league": "Conference League",   "country": "Европ",      "flag": "🌍"},
+    {"path": "soccer/conmebol.libertadores","sportId":"football","league":"Copa Libertadores",   "country": "Өмнөд Америк","flag":"🌎"},
+    {"path": "soccer/fifa.worldq.uefa","sportId":"football",    "league": "World Cup Qualifier", "country": "Олон улс",   "flag": "🌍"},
     # ── Basketball ────────────────────────────────────
     {"path": "basketball/nba",        "sportId": "basketball",  "league": "NBA",                 "country": "АНУ",        "flag": "🇺🇸"},
+    {"path": "basketball/wnba",       "sportId": "basketball",  "league": "WNBA",                "country": "АНУ",        "flag": "🇺🇸"},
+    {"path": "basketball/mens-college-basketball","sportId":"basketball","league":"NCAA","country":"АНУ","flag":"🇺🇸"},
     # ── Baseball ──────────────────────────────────────
     {"path": "baseball/mlb",          "sportId": "baseball",    "league": "MLB",                 "country": "АНУ",        "flag": "🇺🇸"},
+    {"path": "baseball/college-baseball","sportId":"baseball",  "league": "NCAA Baseball",       "country": "АНУ",        "flag": "🇺🇸"},
     # ── Hockey ────────────────────────────────────────
     {"path": "hockey/nhl",            "sportId": "hockey",      "league": "NHL",                 "country": "АНУ/Канад",  "flag": "🇺🇸"},
+    # ── American Football ─────────────────────────────
+    {"path": "football/nfl",          "sportId": "americanfootball", "league": "NFL",            "country": "АНУ",        "flag": "🇺🇸"},
+    {"path": "football/college-football", "sportId": "americanfootball", "league": "NCAA",       "country": "АНУ",        "flag": "🇺🇸"},
     # ── MMA / Boxing ──────────────────────────────────
     {"path": "mma/ufc",               "sportId": "mma",         "league": "UFC",                 "country": "Олон улс",   "flag": "🌍"},
+    {"path": "mma/pfl",               "sportId": "mma",         "league": "PFL",                 "country": "Олон улс",   "flag": "🌍"},
     # ── Tennis ────────────────────────────────────────
     {"path": "tennis/atp",            "sportId": "tennis",      "league": "ATP Tour",            "country": "Олон улс",   "flag": "🌍"},
     {"path": "tennis/wta",            "sportId": "tennis",      "league": "WTA Tour",            "country": "Олон улс",   "flag": "🌍"},
@@ -472,6 +493,201 @@ with _esim_lock:
     _esim_matches = _init_esports_sim()
 
 # ═══════════════════════════════════════════════════════
+#  REAL-PLAYER SIMULATIONS for sports without ESPN data
+# ═══════════════════════════════════════════════════════
+_othersim_matches = []
+_othersim_lock = threading.Lock()
+
+def _init_other_sims():
+    matches = []
+    now = datetime.now(timezone.utc)
+
+    # ── Tennis (ATP/WTA top players, current season) ──────
+    atp_players = [
+        ("Carlos Alcaraz","🇪🇸"),("Jannik Sinner","🇮🇹"),("Novak Djokovic","🇷🇸"),
+        ("Daniil Medvedev","🇷🇺"),("Alexander Zverev","🇩🇪"),("Andrey Rublev","🇷🇺"),
+        ("Stefanos Tsitsipas","🇬🇷"),("Casper Ruud","🇳🇴"),("Hubert Hurkacz","🇵🇱"),
+        ("Taylor Fritz","🇺🇸"),("Holger Rune","🇩🇰"),("Grigor Dimitrov","🇧🇬"),
+    ]
+    wta_players = [
+        ("Iga Swiatek","🇵🇱"),("Aryna Sabalenka","🇧🇾"),("Coco Gauff","🇺🇸"),
+        ("Elena Rybakina","🇰🇿"),("Jessica Pegula","🇺🇸"),("Ons Jabeur","🇹🇳"),
+        ("Karolina Muchova","🇨🇿"),("Maria Sakkari","🇬🇷"),("Qinwen Zheng","🇨🇳"),
+        ("Daria Kasatkina","🇷🇺"),
+    ]
+    tennis_events = [
+        ("ATP — Roland Garros", atp_players, "🇫🇷", "Франц"),
+        ("ATP — Madrid Open",  atp_players, "🇪🇸", "Испани"),
+        ("ATP — Rome Masters", atp_players, "🇮🇹", "Итали"),
+        ("WTA — Roland Garros", wta_players, "🇫🇷", "Франц"),
+        ("WTA — Madrid Open",  wta_players, "🇪🇸", "Испани"),
+    ]
+    for league, pool, flag, country in tennis_events:
+        random.shuffle(pool)
+        for i in range(0, min(6, len(pool)-1), 2):
+            h, hf = pool[i]; a, af = pool[i+1]
+            is_live = random.random() < 0.5
+            sets_h = random.randint(0,2) if is_live else 0
+            sets_a = random.randint(0,2) if is_live else 0
+            cur_set = sets_h + sets_a + 1 if is_live else 0
+            mid = f"tsim_{league}_{h}_{a}".replace(" ","_").replace("—","").lower()
+            mkts = [
+                {"id":f"{mid}_ml","name":"Ялагч","options":[
+                    {"label":h.split()[-1],"odds":round(random.uniform(1.4,3.0),2)},
+                    {"label":a.split()[-1],"odds":round(random.uniform(1.4,3.0),2)},
+                ]},
+                {"id":f"{mid}_sets","name":"Нийт сет 3.5","options":[
+                    {"label":"Дээш","odds":1.85},{"label":"Доош","odds":1.95},
+                ]},
+            ]
+            matches.append({
+                "id":mid,"sportId":"tennis","league":league,
+                "country":country,"countryFlag":flag,
+                "homeTeam":h,"awayTeam":a,"homeLogo":"","awayLogo":"",
+                "isLive":is_live,
+                "homeScore":sets_h,"awayScore":sets_a,
+                "minute":0,
+                "minuteStr":f"Сет {cur_set}" if is_live else None,
+                "period":f"Сет {cur_set}" if is_live else None,
+                "_startOffset": 0 if is_live else random.uniform(2,12)*3600,
+                "totalMarkets": 25 + random.randint(5,20),
+                "markets": mkts,
+            })
+
+    # ── MMA / UFC ────────────────────────────────────
+    mma_fighters = [
+        ("Islam Makhachev","🇷🇺"),("Alex Pereira","🇧🇷"),("Jon Jones","🇺🇸"),
+        ("Leon Edwards","🏴󠁧󠁢󠁥󠁮󠁧󠁿"),("Sean Strickland","🇺🇸"),("Charles Oliveira","🇧🇷"),
+        ("Ilia Topuria","🇪🇸"),("Max Holloway","🇺🇸"),("Dustin Poirier","🇺🇸"),
+        ("Sean O'Malley","🇺🇸"),("Merab Dvalishvili","🇬🇪"),("Khamzat Chimaev","🇸🇪"),
+    ]
+    mma_events = [("UFC 305", "🇦🇺", "Австрали"), ("UFC Fight Night", "🇺🇸", "АНУ")]
+    for league, flag, country in mma_events:
+        random.shuffle(mma_fighters)
+        for i in range(0, 6, 2):
+            h,_ = mma_fighters[i]; a,_ = mma_fighters[i+1]
+            is_live = (i==0 and random.random()<0.4)
+            mid = f"msim_{league}_{h}_{a}".replace(" ","_").lower()
+            ph = round(random.uniform(1.5,2.8),2); pa = round(random.uniform(1.5,2.8),2)
+            mkts = [
+                {"id":f"{mid}_ml","name":"Ялагч","options":[
+                    {"label":h.split()[-1],"odds":ph},{"label":a.split()[-1],"odds":pa},
+                ]},
+                {"id":f"{mid}_method","name":"Ялалтын арга","options":[
+                    {"label":"KO/TKO","odds":2.10},{"label":"Submission","odds":4.50},{"label":"Decision","odds":2.40},
+                ]},
+                {"id":f"{mid}_rounds","name":"Тулааны үргэлжлэх 2.5","options":[
+                    {"label":"Дээш","odds":1.85},{"label":"Доош","odds":1.95},
+                ]},
+            ]
+            rnd = random.randint(1,3) if is_live else 0
+            matches.append({
+                "id":mid,"sportId":"mma","league":league,
+                "country":country,"countryFlag":flag,
+                "homeTeam":h,"awayTeam":a,"homeLogo":"","awayLogo":"",
+                "isLive":is_live,"homeScore":0,"awayScore":0,
+                "minute":0,
+                "minuteStr":f"Раунд {rnd}" if is_live else None,
+                "period":f"Раунд {rnd}" if is_live else None,
+                "_startOffset": 0 if is_live else random.uniform(3,48)*3600,
+                "totalMarkets": 18,
+                "markets": mkts,
+            })
+
+    # ── Volleyball (FIVB Nations League) ──────────────
+    vb_teams = [("Италийн","🇮🇹"),("Польшийн","🇵🇱"),("Бразилын","🇧🇷"),
+                ("Францын","🇫🇷"),("Японы","🇯🇵"),("АНУ-ын","🇺🇸"),
+                ("Серби","🇷🇸"),("Слови","🇸🇮"),("Кубын","🇨🇺"),("Аргентин","🇦🇷")]
+    random.shuffle(vb_teams)
+    for i in range(0, 6, 2):
+        h,hf = vb_teams[i]; a,af = vb_teams[i+1]
+        is_live = i<=2
+        sets_h = random.randint(0,3) if is_live else 0
+        sets_a = random.randint(0,3) if is_live else 0
+        mid = f"vsim_{h}_{a}".replace(" ","_").lower()
+        ph = round(random.uniform(1.5,2.5),2); pa = round(random.uniform(1.5,2.5),2)
+        matches.append({
+            "id":mid,"sportId":"volleyball","league":"FIVB Nations League 2025",
+            "country":"Олон улс","countryFlag":"🌍",
+            "homeTeam":f"{h} баг","awayTeam":f"{a} баг","homeLogo":"","awayLogo":"",
+            "isLive":is_live,"homeScore":sets_h,"awayScore":sets_a,
+            "minute":0,
+            "minuteStr":f"Сет {sets_h+sets_a+1}" if is_live else None,
+            "period":f"Сет {sets_h+sets_a+1}" if is_live else None,
+            "_startOffset": 0 if is_live else random.uniform(2,24)*3600,
+            "totalMarkets": 15,
+            "markets":[
+                {"id":f"{mid}_ml","name":"Ялагч","options":[
+                    {"label":"1","odds":ph},{"label":"2","odds":pa},
+                ]},
+                {"id":f"{mid}_sets","name":"Нийт сет 4.5","options":[
+                    {"label":"Дээш","odds":1.92},{"label":"Доош","odds":1.88},
+                ]},
+            ],
+        })
+
+    # ── Table Tennis (WTT Champions) ─────────────────
+    tt_players = [("Fan Zhendong","🇨🇳"),("Wang Chuqin","🇨🇳"),("Tomokazu Harimoto","🇯🇵"),
+                  ("Hugo Calderano","🇧🇷"),("Dimitrij Ovtcharov","🇩🇪"),("Truls Möregårdh","🇸🇪"),
+                  ("Lin Yun-Ju","🇹🇼"),("Patrick Franziska","🇩🇪"),("Liang Jingkun","🇨🇳"),("Anton Källberg","🇸🇪")]
+    random.shuffle(tt_players)
+    for i in range(0, 6, 2):
+        h,_ = tt_players[i]; a,_ = tt_players[i+1]
+        is_live = i<=2
+        sh = random.randint(0,3) if is_live else 0
+        sa = random.randint(0,3) if is_live else 0
+        mid = f"ttsim_{h}_{a}".replace(" ","_").lower()
+        ph = round(random.uniform(1.4,2.6),2); pa = round(random.uniform(1.4,2.6),2)
+        matches.append({
+            "id":mid,"sportId":"tabletennis","league":"WTT Champions",
+            "country":"Олон улс","countryFlag":"🌍",
+            "homeTeam":h,"awayTeam":a,"homeLogo":"","awayLogo":"",
+            "isLive":is_live,"homeScore":sh,"awayScore":sa,
+            "minute":0,
+            "minuteStr":f"Тоглолт {sh+sa+1}" if is_live else None,
+            "period":f"Тоглолт {sh+sa+1}" if is_live else None,
+            "_startOffset": 0 if is_live else random.uniform(1,8)*3600,
+            "totalMarkets": 12,
+            "markets":[
+                {"id":f"{mid}_ml","name":"Ялагч","options":[
+                    {"label":h.split()[-1],"odds":ph},{"label":a.split()[-1],"odds":pa},
+                ]},
+            ],
+        })
+
+    # ── Badminton (BWF World Tour) ──────────────────
+    bd_players = [("Viktor Axelsen","🇩🇰"),("Anders Antonsen","🇩🇰"),("Kunlavut Vitidsarn","🇹🇭"),
+                  ("Shi Yuqi","🇨🇳"),("Anthony Ginting","🇮🇩"),("Jonatan Christie","🇮🇩"),
+                  ("Loh Kean Yew","🇸🇬"),("Lakshya Sen","🇮🇳"),("Lee Zii Jia","🇲🇾"),("Chou Tien-chen","🇹🇼")]
+    random.shuffle(bd_players)
+    for i in range(0, 4, 2):
+        h,_ = bd_players[i]; a,_ = bd_players[i+1]
+        is_live = i==0
+        mid = f"bdsim_{h}_{a}".replace(" ","_").lower()
+        ph = round(random.uniform(1.3,2.5),2); pa = round(random.uniform(1.3,2.5),2)
+        matches.append({
+            "id":mid,"sportId":"badminton","league":"BWF World Tour Finals",
+            "country":"Олон улс","countryFlag":"🌍",
+            "homeTeam":h,"awayTeam":a,"homeLogo":"","awayLogo":"",
+            "isLive":is_live,"homeScore":random.randint(0,2) if is_live else 0,
+            "awayScore":random.randint(0,2) if is_live else 0,
+            "minute":0,"minuteStr":"Game 2" if is_live else None,
+            "period":"Game 2" if is_live else None,
+            "_startOffset": 0 if is_live else random.uniform(1,6)*3600,
+            "totalMarkets": 10,
+            "markets":[
+                {"id":f"{mid}_ml","name":"Ялагч","options":[
+                    {"label":h.split()[-1],"odds":ph},{"label":a.split()[-1],"odds":pa},
+                ]},
+            ],
+        })
+
+    return matches
+
+with _othersim_lock:
+    _othersim_matches = _init_other_sims()
+
+# ═══════════════════════════════════════════════════════
 #  REAL ODDS — The Odds API overlay
 # ═══════════════════════════════════════════════════════
 _odds_cache={}; _odds_lock=threading.Lock()
@@ -542,12 +758,19 @@ def refresh_all():
         # Esports simulation
         _update_esports_sim()
         with _esim_lock:
-            now=datetime.now(timezone.utc)
             for m in _esim_matches:
                 off=m.get("_startOffset",0)
                 start_ts=time.time() + (0 if m["isLive"] else off)
                 start_iso=datetime.fromtimestamp(start_ts,tz=timezone.utc).isoformat()
                 events.append({**{k:v for k,v in m.items() if not k.startswith("_")},"startTime":start_iso})
+
+    # 3. Other-sport simulations (tennis/MMA/volleyball/tabletennis/badminton)
+    with _othersim_lock:
+        for m in _othersim_matches:
+            off=m.get("_startOffset",0)
+            start_ts=time.time() + (0 if m["isLive"] else off)
+            start_iso=datetime.fromtimestamp(start_ts,tz=timezone.utc).isoformat()
+            events.append({**{k:v for k,v in m.items() if not k.startswith("_")},"startTime":start_iso})
 
     with _cache_lock:
         _cache["events"]=events
@@ -557,11 +780,18 @@ def refresh_all():
 def _bg():
     refresh_all(); fetch_real_odds()
     odds_t=time.time()
+    sim_t=time.time()
     while True:
         time.sleep(60)
         refresh_all()
         if time.time()-odds_t>600:
             fetch_real_odds(); odds_t=time.time()
+        # Reshuffle other-sport sim every 30 minutes
+        if time.time()-sim_t>1800:
+            global _othersim_matches
+            with _othersim_lock:
+                _othersim_matches = _init_other_sims()
+            sim_t=time.time()
 
 threading.Thread(target=_bg, daemon=True).start()
 
