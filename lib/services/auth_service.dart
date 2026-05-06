@@ -51,12 +51,29 @@ class AuthService {
     } catch (_) {}
   }
 
-  static Future<Map<String, dynamic>> register(String username, String password) async {
+  static Future<Map<String, dynamic>> sendCode(String email) async {
+    try {
+      final res = await http.post(
+        Uri.parse('$_base/api/send-code'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email}),
+      ).timeout(const Duration(seconds: 20));
+      return jsonDecode(res.body) as Map<String, dynamic>;
+    } catch (e) {
+      return {'error': 'Сүлжээний алдаа: $e'};
+    }
+  }
+
+  static Future<Map<String, dynamic>> register(
+    String email, String username, String password, String code) async {
     try {
       final res = await http.post(
         Uri.parse('$_base/api/register'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'username': username, 'password': password}),
+        body: jsonEncode({
+          'email': email, 'username': username,
+          'password': password, 'code': code,
+        }),
       ).timeout(const Duration(seconds: 10));
       final data = jsonDecode(res.body) as Map<String, dynamic>;
       if (res.statusCode == 200 && data['success'] == true) {

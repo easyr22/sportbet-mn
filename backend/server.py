@@ -994,11 +994,54 @@ threading.Thread(target=_bg, daemon=True).start()
 # ═══════════════════════════════════════════════════════
 #  USERS & AUTH
 # ═══════════════════════════════════════════════════════
-import hashlib, secrets
+import hashlib, secrets, smtplib, ssl, re
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
-users = {}      # username -> {pw_hash, balance, transactions, created}
-sessions = {}   # token -> username
+SMTP_USER = os.environ.get("SMTP_USER", "")
+SMTP_PASS = os.environ.get("SMTP_PASS", "")
+
+users = {}              # username -> {pw_hash, email, balance, transactions, created}
+sessions = {}           # token -> username
+pending_codes = {}      # email -> {code, expires_at, attempts}
 users_lock = threading.Lock()
+
+EMAIL_RX = re.compile(r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$")
+
+def send_verify_email(to_email, code):
+    """Send 6-digit code to user. Returns (ok, error_message)."""
+    if not SMTP_USER or not SMTP_PASS:
+        # Dev mode: log code to stdout instead of emailing
+        print(f"[DEV MODE — email not configured] code for {to_email}: {code}")
+        return False, "SMTP не настроен"
+    try:
+        msg = MIMEMultipart("alternative")
+        msg["Subject"] = f"SportBet MN — Баталгаажуулах код: {code}"
+        msg["From"] = f"SportBet MN <{SMTP_USER}>"
+        msg["To"] = to_email
+        html = f"""\
+<html><body style="font-family:Arial,sans-serif;background:#0E1B2C;padding:40px;color:#fff">
+  <div style="max-width:520px;margin:auto;background:#1A2C42;border-radius:8px;padding:32px;border-top:4px solid #22B14C">
+    <h1 style="color:#22B14C;margin:0 0 20px 0;font-size:26px">SportBet MN</h1>
+    <p style="font-size:15px;color:#A8B5C7;margin:0 0 12px 0">Сайн байна уу!</p>
+    <p style="font-size:14px;color:#A8B5C7;margin:0 0 24px 0">Бүртгэлээ баталгаажуулахын тулд доорх кодыг оруулна уу:</p>
+    <div style="background:#0E1B2C;border:2px dashed #22B14C;border-radius:6px;padding:20px;text-align:center;margin:24px 0">
+      <div style="font-size:36px;font-weight:900;color:#22B14C;letter-spacing:8px;font-family:monospace">{code}</div>
+    </div>
+    <p style="font-size:12px;color:#6B7B95;margin:16px 0 0 0">Энэ код 10 минутын дараа хүчингүй болно.</p>
+    <p style="font-size:12px;color:#6B7B95;margin:8px 0 0 0">Хэрэв та бүртгүүлэх гэж байгаагүй бол энэ имэйлийг үл хайхрана уу.</p>
+  </div>
+  <p style="text-align:center;color:#6B7B95;font-size:11px;margin-top:20px">© 2025 SportBet MN</p>
+</body></html>"""
+        msg.attach(MIMEText(html, "html"))
+        ctx = ssl.create_default_context()
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=ctx, timeout=15) as s:
+            s.login(SMTP_USER, SMTP_PASS)
+            s.send_message(msg)
+        return True, None
+    except Exception as ex:
+        print(f"SMTP send error: {ex}")
+        return False, str(ex)
 
 def hash_pw(pw):
     return hashlib.sha256(pw.encode()).hexdigest()
@@ -1032,25 +1075,71 @@ def health():
     return jsonify({"status":"ok","events":cnt,"live":live,"updatedAt":now_iso(),
                     "realOdds":bool(ODDS_API_KEY),"realEsports":bool(PANDASCORE_KEY)})
 
+@app.route("/api/send-code", methods=["POST"])
+def send_code():
+    data = request.get_json() or {}
+    email = (data.get("email") or "").strip().lower()
+    if not EMAIL_RX.match(email):
+        return jsonify({"error":"Имэйл хаяг буруу байна"}), 400
+    with users_lock:
+        # Reject if email already linked to existing account
+        for u in users.values():
+            if u.get("email","").lower() == email:
+                return jsonify({"error":"Энэ имэйл аль хэдийн бүртгэгдсэн"}), 400
+        code = f"{secrets.randbelow(1000000):06d}"
+        pending_codes[email] = {
+            "code": code,
+            "expires_at": time.time() + 600,  # 10 minutes
+            "attempts": 0,
+        }
+    ok, err = send_verify_email(email, code)
+    if ok:
+        return jsonify({"success":True,"message":"Баталгаажуулах код имэйл рүү илгээгдлээ"})
+    else:
+        # Dev fallback: return code in response so user can still test
+        if not SMTP_USER:
+            return jsonify({"success":True,"message":"Имэйл сервер тохируулагдаагүй. Код:","devCode":code})
+        return jsonify({"error":f"Имэйл илгээхэд алдаа: {err}"}), 500
+
 @app.route("/api/register", methods=["POST"])
 def register():
     data = request.get_json() or {}
     username = (data.get("username") or "").strip()
     password = data.get("password") or ""
+    email = (data.get("email") or "").strip().lower()
+    code = (data.get("code") or "").strip()
+    if not EMAIL_RX.match(email):
+        return jsonify({"error":"Имэйл хаяг буруу байна"}), 400
     if len(username) < 3: return jsonify({"error":"Хэрэглэгчийн нэр 3+ тэмдэгт байх ёстой"}), 400
     if len(password) < 4: return jsonify({"error":"Нууц үг 4+ тэмдэгт байх ёстой"}), 400
+    if not code:
+        return jsonify({"error":"Баталгаажуулах кодыг оруулна уу"}), 400
     with users_lock:
+        rec = pending_codes.get(email)
+        if not rec:
+            return jsonify({"error":"Эхлээд имэйл рүү код илгээнэ үү"}), 400
+        if time.time() > rec["expires_at"]:
+            pending_codes.pop(email, None)
+            return jsonify({"error":"Код хүчингүй болсон. Шинэ код авна уу"}), 400
+        rec["attempts"] += 1
+        if rec["attempts"] > 5:
+            pending_codes.pop(email, None)
+            return jsonify({"error":"Хэт олон оролдлого хийсэн. Шинэ код авна уу"}), 400
+        if rec["code"] != code:
+            return jsonify({"error":"Код буруу байна"}), 400
         if username in users: return jsonify({"error":"Энэ нэр аль хэдийн бүртгэгдсэн"}), 400
         users[username] = {
             "pw_hash": hash_pw(password),
-            "balance": 50000.0,  # шинэ хэрэглэгчид 50,000₮ урамшуулал
+            "email": email,
+            "balance": 50000.0,
             "transactions": [{"id":f"tx_{int(time.time()*1000)}","type":"bonus","amount":50000,
                               "balance":50000,"timestamp":now_iso(),"note":"Шинэ хэрэглэгчийн бонус"}],
             "created": now_iso(),
         }
+        pending_codes.pop(email, None)
         token = secrets.token_urlsafe(32)
         sessions[token] = username
-    return jsonify({"success":True,"token":token,"username":username,"balance":50000.0})
+    return jsonify({"success":True,"token":token,"username":username,"email":email,"balance":50000.0})
 
 @app.route("/api/login", methods=["POST"])
 def login():
