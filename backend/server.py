@@ -712,6 +712,105 @@ with _othersim_lock:
     _othersim_matches = _init_other_sims()
 
 # ═══════════════════════════════════════════════════════
+#  GUARANTEED LIVE GENERATOR — fills gaps so every sport has live action
+# ═══════════════════════════════════════════════════════
+LIVE_FILLER_TEAMS = {
+    "football": [
+        ("Manchester United","Chelsea","Premier League","Англи","🏴󠁧󠁢󠁥󠁮󠁧󠁿"),
+        ("Real Madrid","Barcelona","La Liga","Испани","🇪🇸"),
+        ("Bayern Munich","Borussia Dortmund","Bundesliga","Герман","🇩🇪"),
+        ("PSG","Marseille","Ligue 1","Франц","🇫🇷"),
+        ("Inter Milan","Juventus","Serie A","Итали","🇮🇹"),
+        ("Ajax","PSV","Eredivisie","Нидерланд","🇳🇱"),
+        ("Boca Juniors","River Plate","Primera División","Аргентин","🇦🇷"),
+        ("Flamengo","Palmeiras","Série A","Бразил","🇧🇷"),
+    ],
+    "basketball": [
+        ("Boston Celtics","LA Lakers","NBA","АНУ","🇺🇸"),
+        ("Golden State Warriors","Miami Heat","NBA","АНУ","🇺🇸"),
+        ("Denver Nuggets","Phoenix Suns","NBA","АНУ","🇺🇸"),
+        ("New York Knicks","Philadelphia 76ers","NBA Playoffs","АНУ","🇺🇸"),
+        ("Milwaukee Bucks","Dallas Mavericks","NBA","АНУ","🇺🇸"),
+    ],
+    "hockey": [
+        ("Toronto Maple Leafs","Montreal Canadiens","NHL Playoffs","Канад","🇨🇦"),
+        ("Boston Bruins","New York Rangers","NHL Playoffs","АНУ","🇺🇸"),
+        ("Edmonton Oilers","Calgary Flames","NHL Playoffs","Канад","🇨🇦"),
+        ("Tampa Bay Lightning","Florida Panthers","NHL","АНУ","🇺🇸"),
+    ],
+    "baseball": [
+        ("New York Yankees","Boston Red Sox","MLB","АНУ","🇺🇸"),
+        ("LA Dodgers","San Francisco Giants","MLB","АНУ","🇺🇸"),
+        ("Chicago Cubs","St. Louis Cardinals","MLB","АНУ","🇺🇸"),
+        ("Houston Astros","Texas Rangers","MLB","АНУ","🇺🇸"),
+    ],
+    "americanfootball": [
+        ("Kansas City Chiefs","Buffalo Bills","NFL","АНУ","🇺🇸"),
+        ("San Francisco 49ers","Dallas Cowboys","NFL","АНУ","🇺🇸"),
+        ("Philadelphia Eagles","Green Bay Packers","NFL","АНУ","🇺🇸"),
+    ],
+}
+
+def gen_live_filler(sport, count):
+    """Generate live sim matches for a sport when ESPN data is sparse."""
+    teams = LIVE_FILLER_TEAMS.get(sport, [])
+    if not teams: return []
+    out = []
+    pool = list(teams); random.shuffle(pool)
+    for i in range(min(count, len(pool))):
+        h, a, league, country, flag = pool[i]
+        # Realistic live scores per sport
+        if sport == "football":
+            hs = random.randint(0,3); as_ = random.randint(0,3)
+            minute = random.randint(15,85)
+            minute_str = f"{minute}'"
+            period = "1-р хагас" if minute<=45 else "2-р хагас"
+            mkts = soccer_markets(f"lf_{sport}_{i}", h, a, hs, as_, minute, True)
+        elif sport == "basketball":
+            hs = random.randint(45,110); as_ = random.randint(45,110)
+            q = random.randint(2,4)
+            minute_str = f"Q{q} {random.randint(1,12)}:00"
+            period = f"Q{q}"
+            mkts = bball_markets(f"lf_{sport}_{i}", h, a)
+            minute = 0
+        elif sport == "hockey":
+            hs = random.randint(0,5); as_ = random.randint(0,5)
+            p = random.randint(1,3)
+            minute_str = f"P{p} {random.randint(1,20)}:00"
+            period = f"P{p}"
+            mkts = hockey_markets(f"lf_{sport}_{i}", h, a)
+            minute = 0
+        elif sport == "baseball":
+            hs = random.randint(0,8); as_ = random.randint(0,8)
+            inning = random.randint(2,9)
+            minute_str = f"{inning}-р инниг"
+            period = minute_str
+            mkts = baseball_markets(f"lf_{sport}_{i}", h, a)
+            minute = 0
+        elif sport == "americanfootball":
+            hs = random.randint(0,28); as_ = random.randint(0,28)
+            q = random.randint(1,4)
+            minute_str = f"Q{q} {random.randint(1,15)}:00"
+            period = f"Q{q}"
+            mkts = bball_markets(f"lf_{sport}_{i}", h, a)
+            minute = 0
+        else:
+            continue
+        out.append({
+            "id": f"livefill_{sport}_{i}", "sportId": sport,
+            "league": league, "country": country, "countryFlag": flag,
+            "homeTeam": h, "awayTeam": a,
+            "homeLogo": gen_logo(h, "1e5a99"),
+            "awayLogo": gen_logo(a, "ff6b00"),
+            "isLive": True, "homeScore": hs, "awayScore": as_,
+            "minute": minute, "minuteStr": minute_str, "period": period,
+            "startTime": datetime.now(timezone.utc).isoformat(),
+            "totalMarkets": len(mkts)*8 + random.randint(20,40),
+            "markets": mkts,
+        })
+    return out
+
+# ═══════════════════════════════════════════════════════
 #  REAL ODDS — The Odds API overlay
 # ═══════════════════════════════════════════════════════
 _odds_cache={}; _odds_lock=threading.Lock()
@@ -795,6 +894,13 @@ def refresh_all():
             start_ts=time.time() + (0 if m["isLive"] else off)
             start_iso=datetime.fromtimestamp(start_ts,tz=timezone.utc).isoformat()
             events.append({**{k:v for k,v in m.items() if not k.startswith("_")},"startTime":start_iso})
+
+    # 4. Live-gap filler — guarantee at least 4 live matches per major sport
+    MIN_LIVE = 4
+    for sport in ["football","basketball","hockey","baseball","americanfootball"]:
+        live_count = sum(1 for e in events if e["sportId"]==sport and e["isLive"])
+        if live_count < MIN_LIVE:
+            events += gen_live_filler(sport, MIN_LIVE - live_count)
 
     with _cache_lock:
         _cache["events"]=events
