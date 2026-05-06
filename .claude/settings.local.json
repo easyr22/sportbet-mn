@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install *)",
+      "PowerShell(Get-ChildItem \"C:\\\\Program Files\\\\nodejs\" -ErrorAction SilentlyContinue; Get-ChildItem \"C:\\\\Program Files \\(x86\\)\\\\nodejs\" -ErrorAction SilentlyContinue; Get-ChildItem \"$env:APPDATA\\\\npm\" -ErrorAction SilentlyContinue; Get-ChildItem \"$env:ProgramFiles\\\\nodejs\\\\npm.cmd\" -ErrorAction SilentlyContinue)",
+      "PowerShell(python --version 2>$null)",
+      "PowerShell($proc = Start-Process -FilePath \"python\" -ArgumentList \"C:\\\\Users\\\\hitech\\\\OneDrive\\\\Desktop\\\\sportbet_mn2\\\\backend\\\\server.py\" -PassThru -WindowStyle Normal; $proc.Id)",
+      "mcp__Claude_in_Chrome__tabs_context_mcp",
+      "Bash(flutter build *)",
+      "PowerShell(Invoke-WebRequest -Uri \"http://localhost:3001/api/live-events\" -UseBasicParsing | Select-Object -ExpandProperty Content | ConvertFrom-Json | ForEach-Object { \"Live count: $\\($_.count\\)\" }; Invoke-WebRequest -Uri \"http://localhost:3001/api/events\" -UseBasicParsing | Select-Object -ExpandProperty Content | ConvertFrom-Json | ForEach-Object { \"Total events: $\\($_.count\\)\" })",
+      "Bash(python -c ' *)"
+    ]
+  }
+}
