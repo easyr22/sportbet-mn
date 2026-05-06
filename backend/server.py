@@ -902,6 +902,72 @@ def refresh_all():
         if live_count < MIN_LIVE:
             events += gen_live_filler(sport, MIN_LIVE - live_count)
 
+    # 5. FORCE ALL MATCHES LIVE — convert any non-live event to live with simulated data
+    for e in events:
+        if e.get("isLive"): continue
+        sp = e.get("sportId","")
+        e["isLive"] = True
+        if sp == "football":
+            minute = random.randint(8, 88)
+            e["homeScore"] = random.randint(0,3)
+            e["awayScore"] = random.randint(0,3)
+            e["minute"] = minute
+            e["minuteStr"] = f"{minute}'"
+            e["period"] = "1-р хагас" if minute<=45 else "2-р хагас"
+        elif sp == "basketball":
+            q = random.randint(1,4)
+            e["homeScore"] = random.randint(20,110)
+            e["awayScore"] = random.randint(20,110)
+            e["minuteStr"] = f"Q{q} {random.randint(1,12)}:00"
+            e["period"] = f"Q{q}"
+        elif sp == "hockey":
+            p = random.randint(1,3)
+            e["homeScore"] = random.randint(0,5)
+            e["awayScore"] = random.randint(0,5)
+            e["minuteStr"] = f"P{p} {random.randint(1,20)}:00"
+            e["period"] = f"P{p}"
+        elif sp == "baseball":
+            inn = random.randint(2,9)
+            e["homeScore"] = random.randint(0,8)
+            e["awayScore"] = random.randint(0,8)
+            e["minuteStr"] = f"{inn}-р инниг"
+            e["period"] = e["minuteStr"]
+        elif sp == "americanfootball":
+            q = random.randint(1,4)
+            e["homeScore"] = random.randint(0,28)
+            e["awayScore"] = random.randint(0,28)
+            e["minuteStr"] = f"Q{q} {random.randint(1,15)}:00"
+            e["period"] = f"Q{q}"
+        elif sp == "tennis":
+            sh = random.randint(0,2); sa = random.randint(0,2)
+            e["homeScore"] = sh; e["awayScore"] = sa
+            e["minuteStr"] = f"Сет {sh+sa+1}"
+            e["period"] = e["minuteStr"]
+        elif sp == "mma":
+            r = random.randint(1,3)
+            e["minuteStr"] = f"Раунд {r}"
+            e["period"] = e["minuteStr"]
+        elif sp == "volleyball":
+            sh = random.randint(0,3); sa = random.randint(0,3)
+            e["homeScore"] = sh; e["awayScore"] = sa
+            e["minuteStr"] = f"Сет {sh+sa+1}"
+            e["period"] = e["minuteStr"]
+        elif sp == "tabletennis":
+            sh = random.randint(0,3); sa = random.randint(0,3)
+            e["homeScore"] = sh; e["awayScore"] = sa
+            e["minuteStr"] = f"Тоглолт {sh+sa+1}"
+            e["period"] = e["minuteStr"]
+        elif sp == "badminton":
+            sh = random.randint(0,2); sa = random.randint(0,2)
+            e["homeScore"] = sh; e["awayScore"] = sa
+            e["minuteStr"] = f"Game {sh+sa+1}"
+            e["period"] = e["minuteStr"]
+        elif sp == "esports":
+            if not e.get("homeScore"): e["homeScore"] = random.randint(2,14)
+            if not e.get("awayScore"): e["awayScore"] = random.randint(2,14)
+            e["minuteStr"] = e.get("minuteStr") or "Map 1"
+            e["period"] = e["minuteStr"]
+
     with _cache_lock:
         _cache["events"]=events
         _cache["ts"]=time.time()
