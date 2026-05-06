@@ -109,6 +109,19 @@ ESPORTS_TEAMS = {
                 "Version1", "Evil Geniuses", "Oxygen Esports"],
 }
 
+# Helper: generate fallback logo via ui-avatars.com (PNG, CORS-friendly)
+def gen_logo(name, bg="1e5a99", fg="ffffff"):
+    safe = name.replace(" ", "+").replace(".", "")
+    return f"https://ui-avatars.com/api/?name={safe}&background={bg}&color={fg}&size=64&bold=true&format=png"
+
+# Helper: country flag image via flagcdn (use 2-letter code or full name search via wsrv)
+def flag_logo(emoji_flag):
+    # Use Twemoji CDN for crisp emoji flag rendering as PNG
+    if not emoji_flag: return ""
+    cps = "-".join(f"{ord(c):x}" for c in emoji_flag if ord(c) > 127)
+    if not cps: return ""
+    return f"https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/72x72/{cps}.png"
+
 ESPORTS_LOGOS = {
     "Natus Vincere": "https://upload.wikimedia.org/wikipedia/en/thumb/e/e3/NaVi_logo.svg/80px-NaVi_logo.svg.png",
     "FaZe Clan":    "https://upload.wikimedia.org/wikipedia/en/thumb/8/82/FaZe_Clan_logo.svg/80px-FaZe_Clan_logo.svg.png",
@@ -446,7 +459,8 @@ def _init_esports_sim():
             "id":eid,"sportId":"esports",
             "league":league,"country":country,"countryFlag":flag,
             "homeTeam":h,"awayTeam":a,
-            "homeLogo":ESPORTS_LOGOS.get(h,""),"awayLogo":ESPORTS_LOGOS.get(a,""),
+            "homeLogo":ESPORTS_LOGOS.get(h) or gen_logo(h, "ff6b00"),
+            "awayLogo":ESPORTS_LOGOS.get(a) or gen_logo(a, "1e5a99"),
             "isLive":is_live,"homeScore":hs,"awayScore":as_,
             "minute":0,
             "minuteStr":cur_stage if is_live else None,
@@ -543,7 +557,9 @@ def _init_other_sims():
             matches.append({
                 "id":mid,"sportId":"tennis","league":league,
                 "country":country,"countryFlag":flag,
-                "homeTeam":h,"awayTeam":a,"homeLogo":"","awayLogo":"",
+                "homeTeam":h,"awayTeam":a,
+                "homeLogo": flag_logo(hf) or gen_logo(h, "1e5a99"),
+                "awayLogo": flag_logo(af) or gen_logo(a, "ff6b00"),
                 "isLive":is_live,
                 "homeScore":sets_h,"awayScore":sets_a,
                 "minute":0,
@@ -565,7 +581,7 @@ def _init_other_sims():
     for league, flag, country in mma_events:
         random.shuffle(mma_fighters)
         for i in range(0, 6, 2):
-            h,_ = mma_fighters[i]; a,_ = mma_fighters[i+1]
+            h,hf = mma_fighters[i]; a,af = mma_fighters[i+1]
             is_live = (i==0 and random.random()<0.4)
             mid = f"msim_{league}_{h}_{a}".replace(" ","_").lower()
             ph = round(random.uniform(1.5,2.8),2); pa = round(random.uniform(1.5,2.8),2)
@@ -584,7 +600,9 @@ def _init_other_sims():
             matches.append({
                 "id":mid,"sportId":"mma","league":league,
                 "country":country,"countryFlag":flag,
-                "homeTeam":h,"awayTeam":a,"homeLogo":"","awayLogo":"",
+                "homeTeam":h,"awayTeam":a,
+                "homeLogo": flag_logo(hf) or gen_logo(h, "e53935"),
+                "awayLogo": flag_logo(af) or gen_logo(a, "1e5a99"),
                 "isLive":is_live,"homeScore":0,"awayScore":0,
                 "minute":0,
                 "minuteStr":f"Раунд {rnd}" if is_live else None,
@@ -609,7 +627,9 @@ def _init_other_sims():
         matches.append({
             "id":mid,"sportId":"volleyball","league":"FIVB Nations League 2025",
             "country":"Олон улс","countryFlag":"🌍",
-            "homeTeam":f"{h} баг","awayTeam":f"{a} баг","homeLogo":"","awayLogo":"",
+            "homeTeam":f"{h} баг","awayTeam":f"{a} баг",
+            "homeLogo": flag_logo(hf) or gen_logo(h, "1e5a99"),
+            "awayLogo": flag_logo(af) or gen_logo(a, "ff6b00"),
             "isLive":is_live,"homeScore":sets_h,"awayScore":sets_a,
             "minute":0,
             "minuteStr":f"Сет {sets_h+sets_a+1}" if is_live else None,
@@ -632,7 +652,7 @@ def _init_other_sims():
                   ("Lin Yun-Ju","🇹🇼"),("Patrick Franziska","🇩🇪"),("Liang Jingkun","🇨🇳"),("Anton Källberg","🇸🇪")]
     random.shuffle(tt_players)
     for i in range(0, 6, 2):
-        h,_ = tt_players[i]; a,_ = tt_players[i+1]
+        h,hf = tt_players[i]; a,af = tt_players[i+1]
         is_live = i<=2
         sh = random.randint(0,3) if is_live else 0
         sa = random.randint(0,3) if is_live else 0
@@ -641,7 +661,9 @@ def _init_other_sims():
         matches.append({
             "id":mid,"sportId":"tabletennis","league":"WTT Champions",
             "country":"Олон улс","countryFlag":"🌍",
-            "homeTeam":h,"awayTeam":a,"homeLogo":"","awayLogo":"",
+            "homeTeam":h,"awayTeam":a,
+            "homeLogo": flag_logo(hf) or gen_logo(h, "e53935"),
+            "awayLogo": flag_logo(af) or gen_logo(a, "1e5a99"),
             "isLive":is_live,"homeScore":sh,"awayScore":sa,
             "minute":0,
             "minuteStr":f"Тоглолт {sh+sa+1}" if is_live else None,
@@ -661,14 +683,16 @@ def _init_other_sims():
                   ("Loh Kean Yew","🇸🇬"),("Lakshya Sen","🇮🇳"),("Lee Zii Jia","🇲🇾"),("Chou Tien-chen","🇹🇼")]
     random.shuffle(bd_players)
     for i in range(0, 4, 2):
-        h,_ = bd_players[i]; a,_ = bd_players[i+1]
+        h,hf = bd_players[i]; a,af = bd_players[i+1]
         is_live = i==0
         mid = f"bdsim_{h}_{a}".replace(" ","_").lower()
         ph = round(random.uniform(1.3,2.5),2); pa = round(random.uniform(1.3,2.5),2)
         matches.append({
             "id":mid,"sportId":"badminton","league":"BWF World Tour Finals",
             "country":"Олон улс","countryFlag":"🌍",
-            "homeTeam":h,"awayTeam":a,"homeLogo":"","awayLogo":"",
+            "homeTeam":h,"awayTeam":a,
+            "homeLogo": flag_logo(hf) or gen_logo(h, "22b14c"),
+            "awayLogo": flag_logo(af) or gen_logo(a, "1e5a99"),
             "isLive":is_live,"homeScore":random.randint(0,2) if is_live else 0,
             "awayScore":random.randint(0,2) if is_live else 0,
             "minute":0,"minuteStr":"Game 2" if is_live else None,
