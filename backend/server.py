@@ -373,17 +373,30 @@ _esim_lock = threading.Lock()
 def _init_esports_sim():
     matches=[]
     game_configs=[
-        ("cs2",     "CS2 — BLAST Premier",        "Олон улс", "🌍",  "🇺🇸",  ["Map 1","Map 2","Map 3"],    True),
-        ("cs2",     "CS2 — PGL Major",             "Олон улс", "🌍",  "🌍",   ["Map 1","Map 2"],            False),
-        ("lol",     "LoL — LCK Spring",            "Солонгос", "🇰🇷", "🇰🇷",  ["Game 1","Game 2","Game 3"], True),
-        ("lol",     "LoL — MSI 2025",              "Олон улс", "🌍",  "🌍",   ["Game 1","Game 2"],          False),
-        ("dota2",   "Dota2 — ESL One",             "Олон улс", "🌍",  "🌍",   ["Game 1","Game 2","Game 3"], True),
-        ("valorant","Valorant — VCT Masters",       "Олон улс", "🌍",  "🌍",   ["Map 1","Map 2","Map 3"],   True),
-        ("valorant","Valorant — Champions",         "Олон улс", "🌍",  "🌍",   ["Map 1","Map 2"],           False),
-        ("rl",      "Rocket League — RLCS 2025",   "Олон улс", "🌍",  "🌍",   ["Game 1","Game 2","Game 3"], False),
+        # CS2 — олон тэмцээн
+        ("cs2",     "CS2 — BLAST Premier Final",     "Олон улс", "🌍",  ["Map 1: Mirage","Map 2: Inferno","Map 3: Ancient"], True),
+        ("cs2",     "CS2 — IEM Katowice",            "Польш",     "🇵🇱", ["Map 1: Dust2","Map 2: Nuke"],                    True),
+        ("cs2",     "CS2 — PGL Major Copenhagen",    "Дани",      "🇩🇰", ["Map 1: Anubis","Map 2: Vertigo","Map 3: Mirage"], True),
+        ("cs2",     "CS2 — ESL Pro League",          "Олон улс", "🌍",  ["Map 1: Inferno","Map 2: Overpass"],              False),
+        # LoL — олон бүсийн лиг
+        ("lol",     "LoL — LCK Spring Finals",       "Солонгос", "🇰🇷", ["Game 1","Game 2","Game 3","Game 4"],            True),
+        ("lol",     "LoL — LPL Summer",              "Хятад",    "🇨🇳", ["Game 1","Game 2","Game 3"],                     True),
+        ("lol",     "LoL — MSI 2025",                "Олон улс", "🌍",  ["Game 1","Game 2","Game 3"],                     True),
+        ("lol",     "LoL — Worlds Play-Ins",         "Олон улс", "🌍",  ["Game 1","Game 2"],                              False),
+        # Dota 2
+        ("dota2",   "Dota 2 — ESL One Birmingham",   "Англи",    "🏴󠁧󠁢󠁥󠁮󠁧󠁿", ["Game 1","Game 2","Game 3"],                     True),
+        ("dota2",   "Dota 2 — DreamLeague S25",      "Швед",     "🇸🇪", ["Game 1","Game 2"],                              True),
+        ("dota2",   "Dota 2 — The International 14", "Олон улс", "🌍",  ["Game 1","Game 2","Game 3","Game 4","Game 5"],   False),
+        # Valorant
+        ("valorant","Valorant — VCT Masters Madrid", "Испани",   "🇪🇸", ["Map 1: Bind","Map 2: Haven","Map 3: Ascent"],   True),
+        ("valorant","Valorant — VCT Pacific",        "Япон",     "🇯🇵", ["Map 1: Split","Map 2: Lotus"],                  True),
+        ("valorant","Valorant — Champions Tour",     "АНУ",      "🇺🇸", ["Map 1: Sunset","Map 2: Pearl","Map 3: Icebox"], False),
+        # Rocket League
+        ("rl",      "Rocket League — RLCS Major",    "Олон улс", "🌍",  ["Game 1","Game 2","Game 3"],                     True),
+        ("rl",      "Rocket League — RLCS World",    "Канад",    "🇨🇦", ["Game 1","Game 2"],                              False),
     ]
     used={}
-    for game,league,country,flag,flag2,stages,is_live in game_configs:
+    for game,league,country,flag,stages,is_live in game_configs:
         teams=ESPORTS_TEAMS.get(game,[])
         pool=[t for t in teams if used.get(f"{game}_{t}",0)<1]
         if len(pool)<2: pool=teams
@@ -397,6 +410,17 @@ def _init_esports_sim():
         eid=f"esim_{game}_{h}_{a}".replace(" ","_").lower()
         mkts=esports_markets(eid,h,a)
         start_off=0 if is_live else random.uniform(1,8)*3600
+        # Realistic in-game scores
+        if is_live and game in ("cs2","valorant"):
+            hs=random.randint(2,14); as_=random.randint(2,14)
+        elif is_live and game=="lol":
+            hs=random.randint(3,18); as_=random.randint(3,18)
+        elif is_live and game=="dota2":
+            hs=random.randint(8,35); as_=random.randint(8,35)
+        elif is_live:
+            hs=random.randint(0,3); as_=random.randint(0,3)
+        else:
+            hs=0; as_=0
         matches.append({
             "id":eid,"sportId":"esports",
             "league":league,"country":country,"countryFlag":flag,
@@ -407,8 +431,9 @@ def _init_esports_sim():
             "minuteStr":cur_stage if is_live else None,
             "period":cur_stage if is_live else None,
             "_startOffset": start_off,
-            "_gameDuration": random.randint(15,50)*60,  # seconds
+            "_gameDuration": random.randint(15,50)*60,
             "_elapsed": random.randint(0, 2700) if is_live else 0,
+            "_stages": stages,
             "totalMarkets":len(mkts)*5+random.randint(10,30),
             "markets":mkts,
         })
@@ -418,21 +443,30 @@ def _update_esports_sim():
     with _esim_lock:
         for m in _esim_matches:
             if not m["isLive"]: continue
-            m["_elapsed"] = m.get("_elapsed",0) + 30
+            m["_elapsed"] = m.get("_elapsed",0) + 60
             dur = m.get("_gameDuration", 2400)
-            if m["_elapsed"] >= dur:
-                # game over → next map/game
-                m["_elapsed"] = 0
-                stages=["Map 1","Map 2","Map 3","Game 1","Game 2","Game 3"]
-                cur=m.get("minuteStr","Game 1")
-                idx=stages.index(cur) if cur in stages else 0
-                if idx+1 < len(stages):
-                    nxt=stages[idx+1]
-                    m["minuteStr"]=nxt; m["period"]=nxt
-                    if random.random()<0.5: m["homeScore"]+=1
-                    else: m["awayScore"]+=1
+
+            # Random in-game score updates (CS2 round wins, LoL kills, etc.)
+            if random.random() < 0.3:
+                if random.random() < 0.5:
+                    m["homeScore"] = m.get("homeScore",0) + 1
                 else:
-                    m["isLive"]=False
+                    m["awayScore"] = m.get("awayScore",0) + 1
+
+            if m["_elapsed"] >= dur:
+                m["_elapsed"] = 0
+                # Move to next stage if exists
+                stages = m.get("_stages", [])
+                cur = m.get("minuteStr","")
+                if cur in stages:
+                    idx = stages.index(cur)
+                    if idx+1 < len(stages):
+                        nxt = stages[idx+1]
+                        m["minuteStr"] = nxt
+                        m["period"] = nxt
+                    else:
+                        # last stage finished
+                        m["isLive"] = False
 
 with _esim_lock:
     _esim_matches = _init_esports_sim()
