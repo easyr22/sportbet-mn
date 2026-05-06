@@ -10,7 +10,8 @@
       "PowerShell(Invoke-WebRequest -Uri \"http://localhost:3001/api/live-events\" -UseBasicParsing | Select-Object -ExpandProperty Content | ConvertFrom-Json | ForEach-Object { \"Live count: $\\($_.count\\)\" }; Invoke-WebRequest -Uri \"http://localhost:3001/api/events\" -UseBasicParsing | Select-Object -ExpandProperty Content | ConvertFrom-Json | ForEach-Object { \"Total events: $\\($_.count\\)\" })",
       "Bash(python -c ' *)",
       "PowerShell($env:Path += \";C:\\\\Program Files\\\\GitHub CLI\"; gh --version 2>&1)",
-      "PowerShell(cd \"C:\\\\Users\\\\hitech\\\\OneDrive\\\\Desktop\\\\sportbet_mn2\"; Get-Process python -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue; Start-Sleep 1; Start-Process powershell -ArgumentList \"-NoExit\", \"-Command\", \"cd 'C:\\\\Users\\\\hitech\\\\OneDrive\\\\Desktop\\\\sportbet_mn2'; python backend/server.py\")"
+      "PowerShell(cd \"C:\\\\Users\\\\hitech\\\\OneDrive\\\\Desktop\\\\sportbet_mn2\"; Get-Process python -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue; Start-Sleep 1; Start-Process powershell -ArgumentList \"-NoExit\", \"-Command\", \"cd 'C:\\\\Users\\\\hitech\\\\OneDrive\\\\Desktop\\\\sportbet_mn2'; python backend/server.py\")",
+      "PowerShell(try { $r = Invoke-WebRequest \"https://sportbet-mn.onrender.com\" -TimeoutSec 30 -UseBasicParsing; \"Status: $\\($r.StatusCode\\), Size: $\\($r.RawContentLength\\) bytes\" } catch { \"Error: $_\" })"
     ]
   }
 }

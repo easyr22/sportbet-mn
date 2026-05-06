@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../constants/app_colors.dart';
 import '../data/bet_provider.dart';
+import '../services/auth_service.dart';
+import 'auth_dialog.dart';
 
 class TopBar extends StatelessWidget {
   final int currentPage;
@@ -30,9 +32,42 @@ class TopBar extends StatelessWidget {
               const SizedBox(width: 16),
               _LangChip('🇲🇳 MN'),
               const SizedBox(width: 8),
-              _AuthBtn('Нэвтрэх', AppColors.surfaceHov, Colors.white),
-              const SizedBox(width: 6),
-              _AuthBtn('Бүртгүүлэх', AppColors.accent, Colors.white),
+              if (AuthService.isLoggedIn) ...[
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppColors.accent.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(3),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.person, size: 12, color: AppColors.accent),
+                      const SizedBox(width: 4),
+                      Text(AuthService.username ?? '', style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w600)),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Builder(
+                  builder: (ctx) => _AuthBtn('Гарах', AppColors.surfaceHov, Colors.white, onTap: () async {
+                    await AuthService.logout();
+                    if (ctx.mounted) await ctx.read<BetProvider>().refreshBalance();
+                  }),
+                ),
+              ] else ...[
+                Builder(
+                  builder: (ctx) => _AuthBtn('Нэвтрэх', AppColors.surfaceHov, Colors.white, onTap: () {
+                    showDialog(context: ctx, builder: (_) => const AuthDialog(startOnRegister: false));
+                  }),
+                ),
+                const SizedBox(width: 6),
+                Builder(
+                  builder: (ctx) => _AuthBtn('Бүртгүүлэх', AppColors.accent, Colors.white, onTap: () {
+                    showDialog(context: ctx, builder: (_) => const AuthDialog(startOnRegister: true));
+                  }),
+                ),
+              ],
             ],
           ),
         ),
@@ -128,13 +163,17 @@ class _LangChip extends StatelessWidget {
 class _AuthBtn extends StatelessWidget {
   final String label;
   final Color bg, fg;
-  const _AuthBtn(this.label, this.bg, this.fg);
+  final VoidCallback? onTap;
+  const _AuthBtn(this.label, this.bg, this.fg, {this.onTap});
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(3)),
-      child: Text(label, style: TextStyle(color: fg, fontSize: 11, fontWeight: FontWeight.w600)),
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+        decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(3)),
+        child: Text(label, style: TextStyle(color: fg, fontSize: 11, fontWeight: FontWeight.w600)),
+      ),
     );
   }
 }

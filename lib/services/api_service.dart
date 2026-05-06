@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import '../models/sport_event.dart';
+import 'auth_service.dart';
 
 class ApiService {
   // Web-д deploy хийхэд автоматаар тухайн домайнаа ашиглана
@@ -16,11 +17,17 @@ class ApiService {
   }
   static const Duration _timeout = Duration(seconds: 8);
 
+  static Map<String, String> get _authHeaders {
+    final h = {'Content-Type': 'application/json'};
+    if (AuthService.token != null) h['X-Session-Token'] = AuthService.token!;
+    return h;
+  }
+
   // ──────────── Balance ────────────
   static Future<double?> fetchBalance() async {
     try {
       final res = await http
-          .get(Uri.parse('$_base/api/balance'))
+          .get(Uri.parse('$_base/api/balance'), headers: _authHeaders)
           .timeout(_timeout);
       if (res.statusCode == 200) {
         final data = jsonDecode(res.body);
@@ -37,7 +44,7 @@ class ApiService {
       final res = await http
           .post(
             Uri.parse('$_base/api/deposit'),
-            headers: {'Content-Type': 'application/json'},
+            headers: _authHeaders,
             body: jsonEncode({'amount': amount}),
           )
           .timeout(_timeout);
@@ -53,7 +60,7 @@ class ApiService {
       final res = await http
           .post(
             Uri.parse('$_base/api/withdraw'),
-            headers: {'Content-Type': 'application/json'},
+            headers: _authHeaders,
             body: jsonEncode({'amount': amount}),
           )
           .timeout(_timeout);
@@ -67,7 +74,7 @@ class ApiService {
   static Future<List<Map<String, dynamic>>> fetchTransactions() async {
     try {
       final res = await http
-          .get(Uri.parse('$_base/api/transactions'))
+          .get(Uri.parse('$_base/api/transactions'), headers: _authHeaders)
           .timeout(_timeout);
       if (res.statusCode == 200) {
         final data = jsonDecode(res.body);

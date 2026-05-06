@@ -566,11 +566,34 @@ def _bg():
 threading.Thread(target=_bg, daemon=True).start()
 
 # ═══════════════════════════════════════════════════════
-#  BALANCE
+#  USERS & AUTH
 # ═══════════════════════════════════════════════════════
-balance=50000.0; transactions=[]; bal_lock=threading.Lock()
+import hashlib, secrets
+
+users = {}      # username -> {pw_hash, balance, transactions, created}
+sessions = {}   # token -> username
+users_lock = threading.Lock()
+
+def hash_pw(pw):
+    return hashlib.sha256(pw.encode()).hexdigest()
+
+def get_user_from_token(token):
+    if not token: return None
+    return sessions.get(token)
 
 def now_iso(): return datetime.now(timezone.utc).isoformat()
+
+# default guest user (for backward compat with existing balance/tx endpoints)
+GUEST = "_guest_"
+users[GUEST] = {"pw_hash": "", "balance": 50000.0, "transactions": [], "created": now_iso()}
+
+bal_lock = threading.Lock()
+
+def _user_for_request():
+    """Returns username; falls back to guest if no session."""
+    token = request.headers.get("X-Session-Token", "")
+    u = get_user_from_token(token)
+    return u if u and u in users else GUEST
 
 # ═══════════════════════════════════════════════════════
 #  API ROUTES
@@ -583,38 +606,93 @@ def health():
     return jsonify({"status":"ok","events":cnt,"live":live,"updatedAt":now_iso(),
                     "realOdds":bool(ODDS_API_KEY),"realEsports":bool(PANDASCORE_KEY)})
 
+@app.route("/api/register", methods=["POST"])
+def register():
+    data = request.get_json() or {}
+    username = (data.get("username") or "").strip()
+    password = data.get("password") or ""
+    if len(username) < 3: return jsonify({"error":"Хэрэглэгчийн нэр 3+ тэмдэгт байх ёстой"}), 400
+    if len(password) < 4: return jsonify({"error":"Нууц үг 4+ тэмдэгт байх ёстой"}), 400
+    with users_lock:
+        if username in users: return jsonify({"error":"Энэ нэр аль хэдийн бүртгэгдсэн"}), 400
+        users[username] = {
+            "pw_hash": hash_pw(password),
+            "balance": 50000.0,  # шинэ хэрэглэгчид 50,000₮ урамшуулал
+            "transactions": [{"id":f"tx_{int(time.time()*1000)}","type":"bonus","amount":50000,
+                              "balance":50000,"timestamp":now_iso(),"note":"Шинэ хэрэглэгчийн бонус"}],
+            "created": now_iso(),
+        }
+        token = secrets.token_urlsafe(32)
+        sessions[token] = username
+    return jsonify({"success":True,"token":token,"username":username,"balance":50000.0})
+
+@app.route("/api/login", methods=["POST"])
+def login():
+    data = request.get_json() or {}
+    username = (data.get("username") or "").strip()
+    password = data.get("password") or ""
+    with users_lock:
+        u = users.get(username)
+        if not u or u["pw_hash"] != hash_pw(password):
+            return jsonify({"error":"Нэр эсвэл нууц үг буруу"}), 401
+        token = secrets.token_urlsafe(32)
+        sessions[token] = username
+    return jsonify({"success":True,"token":token,"username":username,"balance":u["balance"]})
+
+@app.route("/api/logout", methods=["POST"])
+def logout():
+    token = request.headers.get("X-Session-Token", "")
+    sessions.pop(token, None)
+    return jsonify({"success":True})
+
+@app.route("/api/me")
+def me():
+    uname = _user_for_request()
+    u = users[uname]
+    return jsonify({"username": uname if uname != GUEST else None,
+                    "balance": u["balance"],
+                    "guest": uname == GUEST})
+
 @app.route("/api/balance")
-def get_balance(): return jsonify({"balance":balance,"currency":"MNT"})
+def get_balance():
+    uname = _user_for_request()
+    return jsonify({"balance": users[uname]["balance"], "currency":"MNT"})
 
 @app.route("/api/deposit", methods=["POST"])
 def deposit():
-    global balance
-    data=request.get_json() or {}; amount=data.get("amount")
+    uname = _user_for_request()
+    data = request.get_json() or {}; amount = data.get("amount")
     if not isinstance(amount,(int,float)) or amount<=0:
         return jsonify({"error":"Буруу дүн"}),400
     if amount>10_000_000: return jsonify({"error":"10,000,000-с ихгүй"}),400
-    with bal_lock: balance+=amount; cur=balance
+    with bal_lock:
+        users[uname]["balance"] += amount
+        cur = users[uname]["balance"]
     tx={"id":f"tx_{int(time.time()*1000)}","type":"deposit","amount":amount,
         "balance":cur,"timestamp":now_iso(),"note":"Орц нэмсэн"}
-    transactions.insert(0,tx)
+    users[uname]["transactions"].insert(0,tx)
     return jsonify({"success":True,"balance":cur,"amount":amount,"transaction":tx})
 
 @app.route("/api/withdraw", methods=["POST"])
 def withdraw():
-    global balance
-    data=request.get_json() or {}; amount=data.get("amount")
+    uname = _user_for_request()
+    data = request.get_json() or {}; amount = data.get("amount")
     if not isinstance(amount,(int,float)) or amount<=0: return jsonify({"error":"Буруу дүн"}),400
     if amount<1000: return jsonify({"error":"Хамгийн багадаа 1,000₮"}),400
     with bal_lock:
-        if amount>balance: return jsonify({"error":"Үлдэгдэл хүрэлцэхгүй"}),400
-        balance-=amount; cur=balance
+        if amount > users[uname]["balance"]:
+            return jsonify({"error":"Үлдэгдэл хүрэлцэхгүй"}),400
+        users[uname]["balance"] -= amount
+        cur = users[uname]["balance"]
     tx={"id":f"tx_{int(time.time()*1000)}","type":"withdraw","amount":amount,
         "balance":cur,"timestamp":now_iso(),"note":"Гарц авсан"}
-    transactions.insert(0,tx)
+    users[uname]["transactions"].insert(0,tx)
     return jsonify({"success":True,"balance":cur,"amount":amount,"transaction":tx})
 
 @app.route("/api/transactions")
-def get_tx(): return jsonify({"transactions":transactions[:50]})
+def get_tx():
+    uname = _user_for_request()
+    return jsonify({"transactions": users[uname]["transactions"][:50]})
 
 @app.route("/api/live-events")
 def get_live():

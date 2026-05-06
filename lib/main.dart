@@ -3,8 +3,10 @@ import 'package:provider/provider.dart';
 import 'constants/app_colors.dart';
 import 'data/bet_provider.dart';
 import 'screens/app_shell.dart';
+import 'services/auth_service.dart';
 
 void main() {
+  AuthService.loadFromStorage();
   runApp(
     ChangeNotifierProvider(
       create: (_) => BetProvider(),
