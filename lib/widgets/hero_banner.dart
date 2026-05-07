@@ -6,6 +6,9 @@ class HeroBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final w = MediaQuery.of(context).size.width;
+    final isMobile = w < 700;
+    if (isMobile) return _buildMobile(context);
     return Container(
       height: 180,
       margin: const EdgeInsets.fromLTRB(10, 10, 10, 6),
@@ -173,6 +176,57 @@ class HeroBanner extends StatelessWidget {
                 ],
               ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMobile(BuildContext context) {
+    return Container(
+      height: 110,
+      margin: const EdgeInsets.fromLTRB(8, 8, 8, 4),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF1E5A99), Color(0xFF22B14C)],
+          begin: Alignment.topLeft, end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      padding: const EdgeInsets.all(14),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.25),
+                    borderRadius: BorderRadius.circular(3),
+                  ),
+                  child: const Text('БОНУС',
+                      style: TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.w800)),
+                ),
+                const SizedBox(height: 8),
+                const Text('100% БОНУС',
+                    style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w900, height: 1)),
+                const SizedBox(height: 2),
+                const Text('Эхний хадгаламж 300,000₮ хүртэл',
+                    style: TextStyle(color: Colors.white, fontSize: 11)),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: const Text('АВАХ',
+                style: TextStyle(color: AppColors.blueDark, fontSize: 12, fontWeight: FontWeight.w800)),
           ),
         ],
       ),

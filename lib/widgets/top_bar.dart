@@ -13,11 +13,13 @@ class TopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final w = MediaQuery.of(context).size.width;
+    final isMobile = w < 700;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Top utility bar
-        Container(
+        // Top utility bar — hidden on mobile to save space
+        if (!isMobile) Container(
           height: 32,
           color: AppColors.headerTop,
           padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -106,11 +108,37 @@ class TopBar extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 8),
               Consumer<BetProvider>(
                 builder: (_, p, __) => _BalanceChip(balance: p.balance, connected: p.backendConnected),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 6),
+              if (isMobile && !AuthService.isLoggedIn)
+                Builder(
+                  builder: (ctx) => InkWell(
+                    onTap: () => showDialog(context: ctx, builder: (_) => const AuthDialog(startOnRegister: true)),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(color: AppColors.accent, borderRadius: BorderRadius.circular(3)),
+                      child: const Text('Орох', style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w800)),
+                    ),
+                  ),
+                ),
+              if (isMobile && AuthService.isLoggedIn)
+                Builder(
+                  builder: (ctx) => InkWell(
+                    onTap: () async {
+                      await AuthService.logout();
+                      if (ctx.mounted) await ctx.read<BetProvider>().refreshBalance();
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(color: AppColors.surfaceHov, borderRadius: BorderRadius.circular(3)),
+                      child: const Icon(Icons.logout, size: 14, color: Colors.white),
+                    ),
+                  ),
+                ),
+              const SizedBox(width: 4),
               Consumer<BetProvider>(
                 builder: (_, p, __) => p.betCount > 0
                     ? _SlipBadge(count: p.betCount)

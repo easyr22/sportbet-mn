@@ -14,6 +14,7 @@ class MatchRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final market = event.markets.isNotEmpty ? event.markets.first : null;
+    final isMobile = MediaQuery.of(context).size.width < 700;
 
     return Container(
       decoration: const BoxDecoration(
@@ -25,18 +26,18 @@ class MatchRow extends StatelessWidget {
           onTap: () {},
           hoverColor: AppColors.surfaceHov,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+            padding: EdgeInsets.symmetric(horizontal: isMobile ? 8 : 12, vertical: isMobile ? 8 : 7),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 // Time / Live
                 SizedBox(
-                  width: 62,
+                  width: isMobile ? 50 : 62,
                   child: event.isLive
                       ? _LiveBadge(minuteStr: event.minute)
                       : _TimeLabel(time: event.startTime),
                 ),
-                const SizedBox(width: 8),
+                SizedBox(width: isMobile ? 4 : 8),
                 // Teams + score
                 Expanded(
                   child: Column(
@@ -64,7 +65,7 @@ class MatchRow extends StatelessWidget {
                   Consumer<BetProvider>(
                     builder: (_, prov, __) => Row(
                       mainAxisSize: MainAxisSize.min,
-                      children: market.options.take(3).map((opt) {
+                      children: market.options.take(isMobile ? 2 : 3).map((opt) {
                         final sel = prov.isSelected(event.id, market.id, opt.label);
                         return _OddsBtn(
                           label: opt.label,
@@ -84,20 +85,21 @@ class MatchRow extends StatelessWidget {
                       }).toList(),
                     ),
                   ),
-                const SizedBox(width: 6),
-                // +N markets
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: AppColors.oddsBtn,
-                    borderRadius: BorderRadius.circular(4),
-                    border: Border.all(color: AppColors.divider),
+                if (!isMobile) ...[
+                  const SizedBox(width: 6),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: AppColors.oddsBtn,
+                      borderRadius: BorderRadius.circular(4),
+                      border: Border.all(color: AppColors.divider),
+                    ),
+                    child: Text(
+                      '+${event.totalMarkets}',
+                      style: const TextStyle(color: AppColors.textMuted, fontSize: 10),
+                    ),
                   ),
-                  child: Text(
-                    '+${event.totalMarkets}',
-                    style: const TextStyle(color: AppColors.textMuted, fontSize: 10),
-                  ),
-                ),
+                ],
               ],
             ),
           ),
