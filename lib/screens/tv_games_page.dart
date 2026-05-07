@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
+import '../widgets/slot_machine.dart';
+import '../widgets/roulette.dart';
 
 class TvGamesPage extends StatefulWidget {
   const TvGamesPage({super.key});
@@ -70,14 +72,19 @@ class _TvGamesPageState extends State<TvGamesPage> {
                   ],
                 ),
                 const SizedBox(height: 18),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-                  decoration: BoxDecoration(
-                    color: AppColors.accent,
-                    borderRadius: BorderRadius.circular(4),
+                Builder(
+                  builder: (ctx) => InkWell(
+                    onTap: () => showDialog(context: ctx, builder: (_) => const RouletteDialog(gameName: 'Lucky 7')),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: AppColors.accent,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: const Text('БООЦОО ТАВИХ',
+                          style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w800)),
+                    ),
                   ),
-                  child: const Text('БООЦОО ТАВИХ',
-                      style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w800)),
                 ),
               ],
             ),
@@ -152,7 +159,18 @@ class _TvGameTile extends StatelessWidget {
   const _TvGameTile({required this.g});
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return InkWell(
+      onTap: () {
+        final lname = g.name.toLowerCase();
+        if (lname.contains('roulette') || lname.contains('wheel')) {
+          showDialog(context: context, builder: (_) => RouletteDialog(gameName: g.name));
+        } else {
+          showDialog(context: context, builder: (_) => SlotMachineDialog(
+            gameName: g.name, emoji: g.emoji, colors: g.colors,
+          ));
+        }
+      },
+      child: Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(colors: g.colors, begin: Alignment.topLeft, end: Alignment.bottomRight),
         borderRadius: BorderRadius.circular(8),
@@ -176,6 +194,7 @@ class _TvGameTile extends StatelessWidget {
               style: TextStyle(color: Colors.white70, fontSize: 10)),
         ],
       ),
+    ),
     );
   }
 }

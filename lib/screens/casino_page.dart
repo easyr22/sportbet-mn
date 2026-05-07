@@ -1,6 +1,8 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
+import '../widgets/slot_machine.dart';
+import '../widgets/roulette.dart';
 
 class CasinoPage extends StatelessWidget {
   final bool isLive;
@@ -275,15 +277,13 @@ class _GameTile extends StatelessWidget {
   }
 
   void _showComing(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        backgroundColor: AppColors.surface,
-        content: Text('${game.name} — Удахгүй',
-            style: const TextStyle(color: Colors.white)),
-        duration: const Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.all(20),
-      ),
-    );
+    final lname = game.name.toLowerCase();
+    if (lname.contains('roulette') || lname.contains('wheel')) {
+      showDialog(context: context, builder: (_) => RouletteDialog(gameName: game.name));
+    } else {
+      showDialog(context: context, builder: (_) => SlotMachineDialog(
+        gameName: game.name, emoji: game.emoji, colors: game.colors,
+      ));
+    }
   }
 }

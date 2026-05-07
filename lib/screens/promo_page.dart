@@ -107,7 +107,17 @@ class _PromoCard extends StatelessWidget {
   const _PromoCard({required this.p});
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return InkWell(
+      onTap: () {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          backgroundColor: AppColors.accent,
+          content: Text('${p.title} — Активлагдлаа! ${p.badge}',
+              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 3),
+        ));
+      },
+      child: Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
         color: AppColors.surface,
@@ -165,6 +175,7 @@ class _PromoCard extends StatelessWidget {
           ),
         ],
       ),
+    ),
     );
   }
 }
