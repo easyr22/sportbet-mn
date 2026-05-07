@@ -122,46 +122,56 @@ def flag_logo(emoji_flag):
     if not cps: return ""
     return f"https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/72x72/{cps}.png"
 
-# Clearbit logo API — for football clubs / business domains
-def clearbit(domain): return f"https://logo.clearbit.com/{domain}"
-
-# Wikimedia Commons PNG renders of SVG team logos — reliable for esports
-def wiki(path): return f"https://upload.wikimedia.org/wikipedia/{path}"
+# Brand-color avatars for esports teams (UI Avatars CDN, reliable, CORS-safe)
+def _brand_avatar(initials, bg, fg="ffffff"):
+    return f"https://ui-avatars.com/api/?name={initials}&background={bg}&color={fg}&size=120&bold=true&format=png&font-size=0.5"
 
 ESPORTS_LOGOS = {
-    "Natus Vincere":     wiki("en/thumb/e/e7/Natus_Vincere_2020_logo.svg/120px-Natus_Vincere_2020_logo.svg.png"),
-    "FaZe Clan":         wiki("en/thumb/8/82/FaZe_Clan_logo.svg/120px-FaZe_Clan_logo.svg.png"),
-    "G2 Esports":        wiki("en/thumb/1/13/G2_Esports_logo.svg/120px-G2_Esports_logo.svg.png"),
-    "Team Vitality":     wiki("en/thumb/4/4c/Team_Vitality_logo.svg/120px-Team_Vitality_logo.svg.png"),
-    "Cloud9":            wiki("en/thumb/f/f1/Cloud9_logo.svg/120px-Cloud9_logo.svg.png"),
-    "Team Liquid":       wiki("en/thumb/3/36/Team_Liquid_logo.svg/120px-Team_Liquid_logo.svg.png"),
-    "T1":                wiki("en/thumb/6/65/T1_(esports)_logo.svg/120px-T1_(esports)_logo.svg.png"),
-    "Gen.G":             wiki("commons/thumb/3/3c/Gen.G_logo.svg/120px-Gen.G_logo.svg.png"),
-    "Fnatic":            wiki("en/thumb/f/fa/Fnatic_logo.svg/120px-Fnatic_logo.svg.png"),
-    "Astralis":          wiki("en/thumb/8/87/Astralis_logo.svg/120px-Astralis_logo.svg.png"),
-    "MOUZ":              wiki("en/thumb/5/56/MOUZ_logo.svg/120px-MOUZ_logo.svg.png"),
-    "ENCE":              wiki("en/thumb/8/89/ENCE_eSports_logo.svg/120px-ENCE_eSports_logo.svg.png"),
-    "Heroic":            wiki("en/thumb/7/75/Heroic_(esports)_logo.svg/120px-Heroic_(esports)_logo.svg.png"),
-    "Sentinels":         wiki("en/thumb/2/26/Sentinels_logo.svg/120px-Sentinels_logo.svg.png"),
-    "NRG":               wiki("en/thumb/d/d6/NRG_Esports_logo.svg/120px-NRG_Esports_logo.svg.png"),
-    "LOUD":              wiki("commons/thumb/6/6b/LOUD_logo.svg/120px-LOUD_logo.svg.png"),
-    "Paper Rex":         wiki("en/thumb/3/30/Paper_Rex_logo.svg/120px-Paper_Rex_logo.svg.png"),
-    "Team Spirit":       wiki("en/thumb/8/85/Team_Spirit_logo.svg/120px-Team_Spirit_logo.svg.png"),
-    "Team Secret":       wiki("en/thumb/2/2a/Team_Secret_logo.svg/120px-Team_Secret_logo.svg.png"),
-    "OG":                wiki("en/thumb/d/d7/OG_(esports)_logo.svg/120px-OG_(esports)_logo.svg.png"),
-    "PSG.LGD":           wiki("en/thumb/2/22/PSG.LGD_logo.svg/120px-PSG.LGD_logo.svg.png"),
-    "Karmine Corp":      wiki("commons/thumb/3/30/Karmine_Corp_logo.svg/120px-Karmine_Corp_logo.svg.png"),
-    "Team BDS":          wiki("en/thumb/4/42/Team_BDS_logo.svg/120px-Team_BDS_logo.svg.png"),
-    "100 Thieves":       wiki("en/thumb/4/47/100_Thieves_logo.svg/120px-100_Thieves_logo.svg.png"),
-    "KT Rolster":        wiki("en/thumb/c/cb/KT_Rolster_logo.svg/120px-KT_Rolster_logo.svg.png"),
-    "Evil Geniuses":     wiki("en/thumb/8/8b/Evil_Geniuses_logo.svg/120px-Evil_Geniuses_logo.svg.png"),
-    "DRX":               wiki("en/thumb/8/89/DRX_logo.svg/120px-DRX_logo.svg.png"),
-    "EDG":               wiki("en/thumb/9/95/Edward_Gaming_logo.svg/120px-Edward_Gaming_logo.svg.png"),
-    "JDG Gaming":        wiki("en/thumb/9/9c/JDG_Intel_Esports_Club_logo.svg/120px-JDG_Intel_Esports_Club_logo.svg.png"),
-    "LNG Esports":       wiki("en/thumb/d/d4/LNG_Esports_logo.svg/120px-LNG_Esports_logo.svg.png"),
-    "Tundra Esports":    wiki("en/thumb/1/12/Tundra_Esports_logo.svg/120px-Tundra_Esports_logo.svg.png"),
-    "BBL Esports":       wiki("en/thumb/8/85/BBL_Esports_logo.svg/120px-BBL_Esports_logo.svg.png"),
-    "Gaimin Gladiators": wiki("en/thumb/9/95/Gaimin_Gladiators_logo.svg/120px-Gaimin_Gladiators_logo.svg.png"),
+    # CS2 — yellow/red/blue brand identities
+    "Natus Vincere":     _brand_avatar("N+V",   "FFE600", "000000"),
+    "FaZe Clan":         _brand_avatar("FZ",    "ED1C24"),
+    "G2 Esports":        _brand_avatar("G2",    "000000", "C5A572"),
+    "Team Vitality":     _brand_avatar("V",     "FFE500", "000000"),
+    "Cloud9":            _brand_avatar("C9",    "00B5E2"),
+    "Team Liquid":       _brand_avatar("TL",    "001E5A"),
+    "MOUZ":              _brand_avatar("M",     "DC1326"),
+    "ENCE":              _brand_avatar("E",     "00FF7F", "000000"),
+    "Heroic":            _brand_avatar("H",     "FF6900"),
+    "Astralis":          _brand_avatar("A",     "EB1C25"),
+    # LoL
+    "T1":                _brand_avatar("T1",    "E2010A"),
+    "Gen.G":             _brand_avatar("G",     "AA8A00", "000000"),
+    "Fnatic":            _brand_avatar("FN",    "FF5900"),
+    "JDG Gaming":        _brand_avatar("JD",    "9C0303"),
+    "LNG Esports":       _brand_avatar("LN",    "FF4500"),
+    "100 Thieves":       _brand_avatar("100",   "EE2E2E"),
+    "KT Rolster":        _brand_avatar("KT",    "E0162B"),
+    "Weibo Gaming":      _brand_avatar("WB",    "FF4500"),
+    # Valorant
+    "Sentinels":         _brand_avatar("S",     "C8102E"),
+    "NRG":               _brand_avatar("NR",    "1A1A1A", "FFD700"),
+    "LOUD":              _brand_avatar("L",     "00FF00", "000000"),
+    "Paper Rex":         _brand_avatar("PR",    "FF1493"),
+    "DRX":               _brand_avatar("DR",    "0066CC"),
+    "ZETA DIVISION":     _brand_avatar("Z",     "1E90FF"),
+    "BBL Esports":       _brand_avatar("BB",    "B8860B"),
+    "EDG":               _brand_avatar("ED",    "B8860B", "000000"),
+    "M80":               _brand_avatar("M8",    "FF8C00"),
+    # Dota 2
+    "OG":                _brand_avatar("OG",    "000000", "C9A227"),
+    "Team Secret":       _brand_avatar("TS",    "0F1C29", "FFD700"),
+    "PSG.LGD":           _brand_avatar("PG",    "002654"),
+    "Tundra Esports":    _brand_avatar("TE",    "FF6B00", "000000"),
+    "Evil Geniuses":     _brand_avatar("EG",    "002F87", "FFD700"),
+    "Gaimin Gladiators": _brand_avatar("GG",    "FF1493"),
+    "Team Spirit":       _brand_avatar("TS",    "B8860B", "000000"),
+    "BetBoom Team":      _brand_avatar("BB",    "FFC107", "000000"),
+    "Aurora":            _brand_avatar("AU",    "9B59B6"),
+    # Rocket League
+    "Team BDS":          _brand_avatar("BD",    "FF6B00", "000000"),
+    "Karmine Corp":      _brand_avatar("KC",    "0066B3"),
+    "Version1":          _brand_avatar("V1",    "00B4FF"),
+    "Oxygen Esports":    _brand_avatar("OX",    "00CED1", "000000"),
 }
 
 # ═══════════════════════════════════════════════════════
