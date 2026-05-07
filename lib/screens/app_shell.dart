@@ -8,6 +8,11 @@ import '../widgets/bet_slip_panel.dart';
 import 'matches_page.dart';
 import 'new_profile_page.dart';
 import 'coming_soon_page.dart';
+import 'casino_page.dart';
+import 'promo_page.dart';
+import 'bingo_page.dart';
+import 'toto_page.dart';
+import 'tv_games_page.dart';
 
 class AppShell extends StatefulWidget {
   const AppShell({super.key});
@@ -65,13 +70,13 @@ class _AppShellState extends State<AppShell> {
       );
     }
 
-    // Coming soon pages
-    if (_page == 4) return const ComingSoonPage(title: 'КАЗИНО', icon: Icons.casino);
-    if (_page == 5) return const ComingSoonPage(title: 'LIVE CASINO', icon: Icons.live_tv);
-    if (_page == 6) return const ComingSoonPage(title: 'ПРОМО', icon: Icons.local_offer, subtitle: 'Шинэ урамшуулал удахгүй');
-    if (_page == 7) return const ComingSoonPage(title: 'TV ТОГЛООМ', icon: Icons.tv);
-    if (_page == 8) return const ComingSoonPage(title: 'БИНГО', icon: Icons.grid_4x4);
-    if (_page == 9) return const ComingSoonPage(title: 'TOTO', icon: Icons.confirmation_number);
+    // Casino / Live Casino / Promo / TV / Bingo / TOTO
+    if (_page == 4) return const CasinoPage(isLive: false);
+    if (_page == 5) return const CasinoPage(isLive: true);
+    if (_page == 6) return const PromoPage();
+    if (_page == 7) return const TvGamesPage();
+    if (_page == 8) return const BingoPage();
+    if (_page == 9) return const TotoPage();
     if (_page == 10) return const ComingSoonPage(title: 'ҮР ДҮН', icon: Icons.assessment, subtitle: 'Тоглолтын архив удахгүй');
 
     // Default: Sports / Live
