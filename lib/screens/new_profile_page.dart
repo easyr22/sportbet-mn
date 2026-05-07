@@ -23,13 +23,13 @@ class ProfilePage extends StatelessWidget {
               const SizedBox(height: 16),
               Row(children: [
                 Expanded(child: _ActionBtn(
-                  icon: Icons.add_circle_outline, label: 'Орц нэмэх',
+                  icon: Icons.add_circle_outline, label: 'Deposit хийх',
                   color: AppColors.green,
                   onTap: () => _showDeposit(context, prov),
                 )),
                 const SizedBox(width: 12),
                 Expanded(child: _ActionBtn(
-                  icon: Icons.remove_circle_outline, label: 'Гаргах',
+                  icon: Icons.remove_circle_outline, label: 'Withdraw хийх',
                   color: AppColors.orange,
                   onTap: () => _showWithdraw(context, prov),
                 )),
@@ -222,7 +222,7 @@ class _TxRow extends StatelessWidget {
         const SizedBox(width: 10),
         Expanded(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(tx['note'] as String? ?? (isDeposit ? 'Орц' : 'Гаргалт'),
+            Text(tx['note'] as String? ?? (isDeposit ? 'Deposit' : 'Withdraw'),
                 style: const TextStyle(color: Colors.white, fontSize: 12)),
             Text(_formatDate(tx['timestamp'] as String? ?? ''),
                 style: const TextStyle(color: AppColors.textMuted, fontSize: 10)),
@@ -269,7 +269,7 @@ class _DepositSheetState extends State<_DepositSheet> {
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-          const Text('Орц нэмэх', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+          const Text('Deposit хийх', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
           const SizedBox(height: 16),
           Wrap(spacing: 8, runSpacing: 8,
             children: [10000, 20000, 50000, 100000].map((a) => _QuickChip(

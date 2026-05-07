@@ -1201,7 +1201,7 @@ def deposit():
         users[uname]["balance"] += amount
         cur = users[uname]["balance"]
     tx={"id":f"tx_{int(time.time()*1000)}","type":"deposit","amount":amount,
-        "balance":cur,"timestamp":now_iso(),"note":"Орц нэмсэн"}
+        "balance":cur,"timestamp":now_iso(),"note":"Deposit хийсэн"}
     users[uname]["transactions"].insert(0,tx)
     return jsonify({"success":True,"balance":cur,"amount":amount,"transaction":tx})
 
@@ -1217,7 +1217,7 @@ def withdraw():
         users[uname]["balance"] -= amount
         cur = users[uname]["balance"]
     tx={"id":f"tx_{int(time.time()*1000)}","type":"withdraw","amount":amount,
-        "balance":cur,"timestamp":now_iso(),"note":"Гарц авсан"}
+        "balance":cur,"timestamp":now_iso(),"note":"Withdraw хийсэн"}
     users[uname]["transactions"].insert(0,tx)
     return jsonify({"success":True,"balance":cur,"amount":amount,"transaction":tx})
 
