@@ -1025,18 +1025,10 @@ users_lock = threading.Lock()
 
 EMAIL_RX = re.compile(r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$")
 
-def send_verify_email(to_email, code):
-    """Send 6-digit code to user. Returns (ok, error_message)."""
-    if not SMTP_USER or not SMTP_PASS:
-        # Dev mode: log code to stdout instead of emailing
-        print(f"[DEV MODE — email not configured] code for {to_email}: {code}")
-        return False, "SMTP не настроен"
-    try:
-        msg = MIMEMultipart("alternative")
-        msg["Subject"] = f"SportBet MN — Баталгаажуулах код: {code}"
-        msg["From"] = f"SportBet MN <{SMTP_USER}>"
-        msg["To"] = to_email
-        html = f"""\
+RESEND_KEY = os.environ.get("RESEND_KEY", "")
+
+def _email_html(code):
+    return f"""\
 <html><body style="font-family:Arial,sans-serif;background:#0E1B2C;padding:40px;color:#fff">
   <div style="max-width:520px;margin:auto;background:#1A2C42;border-radius:8px;padding:32px;border-top:4px solid #22B14C">
     <h1 style="color:#22B14C;margin:0 0 20px 0;font-size:26px">SportBet MN</h1>
@@ -1050,15 +1042,67 @@ def send_verify_email(to_email, code):
   </div>
   <p style="text-align:center;color:#6B7B95;font-size:11px;margin-top:20px">© 2025 SportBet MN</p>
 </body></html>"""
-        msg.attach(MIMEText(html, "html"))
+
+def _send_via_resend(to_email, code):
+    """Use Resend HTTP API (works on free hosting where SMTP is blocked)."""
+    if not RESEND_KEY: return False, "no key"
+    try:
+        r = req.post("https://api.resend.com/emails",
+            headers={"Authorization": f"Bearer {RESEND_KEY}", "Content-Type":"application/json"},
+            json={
+                "from": "SportBet MN <onboarding@resend.dev>",
+                "to": [to_email],
+                "subject": f"SportBet MN — Баталгаажуулах код: {code}",
+                "html": _email_html(code),
+            }, timeout=15)
+        if r.status_code in (200, 202):
+            return True, None
+        return False, f"Resend {r.status_code}: {r.text[:200]}"
+    except Exception as ex:
+        return False, f"Resend exc: {ex}"
+
+def _send_via_smtp(to_email, code, port, use_ssl):
+    """Try SMTP with given port (587 STARTTLS or 465 SSL)."""
+    if not SMTP_USER or not SMTP_PASS: return False, "no smtp creds"
+    try:
+        msg = MIMEMultipart("alternative")
+        msg["Subject"] = f"SportBet MN — Баталгаажуулах код: {code}"
+        msg["From"] = f"SportBet MN <{SMTP_USER}>"
+        msg["To"] = to_email
+        msg.attach(MIMEText(_email_html(code), "html"))
         ctx = ssl.create_default_context()
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=ctx, timeout=15) as s:
-            s.login(SMTP_USER, SMTP_PASS)
-            s.send_message(msg)
+        if use_ssl:
+            with smtplib.SMTP_SSL("smtp.gmail.com", port, context=ctx, timeout=10) as s:
+                s.login(SMTP_USER, SMTP_PASS)
+                s.send_message(msg)
+        else:
+            with smtplib.SMTP("smtp.gmail.com", port, timeout=10) as s:
+                s.starttls(context=ctx)
+                s.login(SMTP_USER, SMTP_PASS)
+                s.send_message(msg)
         return True, None
     except Exception as ex:
-        print(f"SMTP send error: {ex}")
-        return False, str(ex)
+        return False, f"SMTP:{port} exc: {ex}"
+
+def send_verify_email(to_email, code):
+    """Send 6-digit code to user. Tries Resend HTTP API first, then SMTP fallbacks."""
+    # 1) Resend HTTP API (best for free hosting)
+    if RESEND_KEY:
+        ok, err = _send_via_resend(to_email, code)
+        if ok: print(f"[mail] sent to {to_email} via Resend"); return True, None
+        print(f"[mail] resend failed: {err}")
+    # 2) SMTP port 587 STARTTLS
+    if SMTP_USER and SMTP_PASS:
+        ok, err = _send_via_smtp(to_email, code, 587, use_ssl=False)
+        if ok: print(f"[mail] sent to {to_email} via SMTP:587"); return True, None
+        print(f"[mail] smtp 587 failed: {err}")
+        # 3) SMTP port 465 SSL
+        ok, err = _send_via_smtp(to_email, code, 465, use_ssl=True)
+        if ok: print(f"[mail] sent to {to_email} via SMTP:465"); return True, None
+        print(f"[mail] smtp 465 failed: {err}")
+        return False, err
+    print(f"[DEV — no email config] code for {to_email}: {code}")
+    return False, "Email үйлчилгээ тохируулагдаагүй"
 
 def hash_pw(pw):
     return hashlib.sha256(pw.encode()).hexdigest()

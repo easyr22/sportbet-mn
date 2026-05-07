@@ -11,7 +11,8 @@
       "Bash(python -c ' *)",
       "PowerShell($env:Path += \";C:\\\\Program Files\\\\GitHub CLI\"; gh --version 2>&1)",
       "PowerShell(cd \"C:\\\\Users\\\\hitech\\\\OneDrive\\\\Desktop\\\\sportbet_mn2\"; Get-Process python -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue; Start-Sleep 1; Start-Process powershell -ArgumentList \"-NoExit\", \"-Command\", \"cd 'C:\\\\Users\\\\hitech\\\\OneDrive\\\\Desktop\\\\sportbet_mn2'; python backend/server.py\")",
-      "PowerShell(try { $r = Invoke-WebRequest \"https://sportbet-mn.onrender.com\" -TimeoutSec 30 -UseBasicParsing; \"Status: $\\($r.StatusCode\\), Size: $\\($r.RawContentLength\\) bytes\" } catch { \"Error: $_\" })"
+      "PowerShell(try { $r = Invoke-WebRequest \"https://sportbet-mn.onrender.com\" -TimeoutSec 30 -UseBasicParsing; \"Status: $\\($r.StatusCode\\), Size: $\\($r.RawContentLength\\) bytes\" } catch { \"Error: $_\" })",
+      "PowerShell(try { $r = Invoke-WebRequest \"https://sportbet-mn.onrender.com/api/send-code\" -Method POST -Body \\(@{email=\"ygami8397@gmail.com\"} | ConvertTo-Json\\) -ContentType \"application/json\" -TimeoutSec 30 -UseBasicParsing; $r.Content } catch { Write-Output \"Error: $_\"; $_.Exception.Response.GetResponseStream\\(\\) | ForEach-Object { \\(New-Object System.IO.StreamReader\\($_\\)\\).ReadToEnd\\(\\) } })"
     ]
   }
 }
