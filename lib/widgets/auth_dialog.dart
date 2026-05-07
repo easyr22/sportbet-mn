@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../constants/app_colors.dart';
 import '../data/bet_provider.dart';
 import '../services/auth_service.dart';
+import 'forgot_password_dialog.dart';
 
 class AuthDialog extends StatefulWidget {
   final bool startOnRegister;
@@ -208,6 +209,22 @@ class _AuthDialogState extends State<AuthDialog> {
     const SizedBox(height: 12),
     _Field(controller: _pwCtl, label: 'Нууц үг', icon: Icons.lock_outline, obscure: true,
         onSubmitted: () { if (!_loading) _login(); }),
+    const SizedBox(height: 6),
+    Align(
+      alignment: Alignment.centerRight,
+      child: TextButton(
+        onPressed: () async {
+          Navigator.pop(context);
+          await Future.delayed(const Duration(milliseconds: 100));
+          if (context.mounted) {
+            showDialog(context: context, builder: (_) => const ForgotPasswordDialog());
+          }
+        },
+        style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: const Size(50, 28)),
+        child: const Text('Нууц үгээ мартсан уу?',
+            style: TextStyle(color: AppColors.orange, fontSize: 12, fontWeight: FontWeight.w600)),
+      ),
+    ),
   ];
 
   List<Widget> _registerForm() => [

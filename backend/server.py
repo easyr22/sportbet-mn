@@ -1374,6 +1374,68 @@ def register():
         sessions[token] = username
     return jsonify({"success":True,"token":token,"username":username,"email":email,"balance":50000.0})
 
+@app.route("/api/forgot-password", methods=["POST"])
+def forgot_password():
+    data = request.get_json() or {}
+    email = (data.get("email") or "").strip().lower()
+    if not EMAIL_RX.match(email):
+        return jsonify({"error":"Имэйл хаяг буруу байна"}), 400
+    # Find user by email
+    target = None
+    with users_lock:
+        for uname, u in users.items():
+            if uname == GUEST: continue
+            if u.get("email","").lower() == email:
+                target = uname; break
+    if not target:
+        return jsonify({"error":"Энэ имэйлээр бүртгэл олдсонгүй"}), 404
+    code = f"{secrets.randbelow(1000000):06d}"
+    pending_codes[f"reset:{email}"] = {
+        "code": code,
+        "expires_at": time.time() + 600,
+        "attempts": 0,
+        "username": target,
+    }
+    ok, err = send_verify_email(email, code)
+    if ok:
+        return jsonify({"success":True,"message":"Сэргээх код имэйл рүү илгээгдлээ"})
+    return jsonify({
+        "success":True,
+        "message":"Имэйл илгээх боломжгүй байна. Туршилтын код:",
+        "devCode":code,
+    })
+
+@app.route("/api/reset-password", methods=["POST"])
+def reset_password():
+    data = request.get_json() or {}
+    email = (data.get("email") or "").strip().lower()
+    code = (data.get("code") or "").strip()
+    new_pw = data.get("password") or ""
+    if len(new_pw) < 4:
+        return jsonify({"error":"Шинэ нууц үг 4+ тэмдэгт байх ёстой"}), 400
+    key = f"reset:{email}"
+    with users_lock:
+        rec = pending_codes.get(key)
+        if not rec:
+            return jsonify({"error":"Эхлээд код илгээнэ үү"}), 400
+        if time.time() > rec["expires_at"]:
+            pending_codes.pop(key, None)
+            return jsonify({"error":"Код хүчингүй болсон"}), 400
+        rec["attempts"] += 1
+        if rec["attempts"] > 5:
+            pending_codes.pop(key, None)
+            return jsonify({"error":"Хэт олон оролдлого"}), 400
+        if rec["code"] != code:
+            return jsonify({"error":"Код буруу байна"}), 400
+        uname = rec["username"]
+        if uname not in users:
+            return jsonify({"error":"Хэрэглэгч олдсонгүй"}), 404
+        users[uname]["pw_hash"] = hash_pw(new_pw)
+        pending_codes.pop(key, None)
+        token = secrets.token_urlsafe(32)
+        sessions[token] = uname
+    return jsonify({"success":True,"token":token,"username":uname,"message":"Нууц үг шинэчлэгдлээ"})
+
 @app.route("/api/login", methods=["POST"])
 def login():
     data = request.get_json() or {}

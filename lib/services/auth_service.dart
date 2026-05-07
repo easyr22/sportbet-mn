@@ -106,6 +106,38 @@ class AuthService {
     }
   }
 
+  static Future<Map<String, dynamic>> forgotPassword(String email) async {
+    try {
+      final res = await http.post(
+        Uri.parse('$_base/api/forgot-password'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email}),
+      ).timeout(const Duration(seconds: 30));
+      return jsonDecode(res.body) as Map<String, dynamic>;
+    } catch (e) {
+      return {'error': 'Сүлжээний алдаа: $e'};
+    }
+  }
+
+  static Future<Map<String, dynamic>> resetPassword(String email, String code, String newPw) async {
+    try {
+      final res = await http.post(
+        Uri.parse('$_base/api/reset-password'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email, 'code': code, 'password': newPw}),
+      ).timeout(const Duration(seconds: 10));
+      final data = jsonDecode(res.body) as Map<String, dynamic>;
+      if (res.statusCode == 200 && data['success'] == true) {
+        _token = data['token'];
+        _username = data['username'];
+        _save();
+      }
+      return data;
+    } catch (e) {
+      return {'error': 'Сүлжээний алдаа: $e'};
+    }
+  }
+
   static Future<void> logout() async {
     try {
       await http.post(Uri.parse('$_base/api/logout'), headers: headers).timeout(const Duration(seconds: 5));
