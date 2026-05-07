@@ -14,6 +14,8 @@ import 'bingo_page.dart';
 import 'toto_page.dart';
 import 'tv_games_page.dart';
 import 'results_page.dart';
+import '../widgets/winners_ticker.dart';
+import '../widgets/win_popup.dart';
 
 class AppShell extends StatefulWidget {
   const AppShell({super.key});
@@ -34,17 +36,20 @@ class _AppShellState extends State<AppShell> {
 
     return Scaffold(
       backgroundColor: AppColors.bg,
-      body: Column(
-        children: [
-          TopBar(
-            currentPage: _page,
-            onPageChanged: (p) => setState(() {
-              _page = p;
-              if (p != 0 && p != 1) _sport = 'all';
-            }),
-          ),
-          Expanded(child: _buildBody(wide, medium)),
-        ],
+      body: WinPopupOverlay(
+        child: Column(
+          children: [
+            TopBar(
+              currentPage: _page,
+              onPageChanged: (p) => setState(() {
+                _page = p;
+                if (p != 0 && p != 1) _sport = 'all';
+              }),
+            ),
+            const WinnersTicker(),
+            Expanded(child: _buildBody(wide, medium)),
+          ],
+        ),
       ),
       floatingActionButton: !wide && _page < 2 ? _BetFab() : null,
     );
