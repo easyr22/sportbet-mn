@@ -206,7 +206,8 @@ class _AuthDialogState extends State<AuthDialog> {
   List<Widget> _loginForm() => [
     _Field(controller: _userCtl, label: 'Хэрэглэгчийн нэр', icon: Icons.person_outline),
     const SizedBox(height: 12),
-    _Field(controller: _pwCtl, label: 'Нууц үг', icon: Icons.lock_outline, obscure: true),
+    _Field(controller: _pwCtl, label: 'Нууц үг', icon: Icons.lock_outline, obscure: true,
+        onSubmitted: () { if (!_loading) _login(); }),
   ];
 
   List<Widget> _registerForm() => [
@@ -216,7 +217,8 @@ class _AuthDialogState extends State<AuthDialog> {
     const SizedBox(height: 12),
     _Field(controller: _pwCtl, label: 'Нууц үг (4+ тэмдэгт)', icon: Icons.lock_outline, obscure: true),
     const SizedBox(height: 12),
-    _Field(controller: _pw2Ctl, label: 'Нууц үг давтах', icon: Icons.lock_outline, obscure: true),
+    _Field(controller: _pw2Ctl, label: 'Нууц үг давтах', icon: Icons.lock_outline, obscure: true,
+        onSubmitted: () { if (!_loading) _sendCode(); }),
   ];
 
   List<Widget> _codeForm() => [
@@ -244,32 +246,54 @@ class _AuthDialogState extends State<AuthDialog> {
       label: '6 оронтой код',
       icon: Icons.pin_outlined,
       keyboard: TextInputType.number,
+      onSubmitted: () { if (!_loading) _verifyAndRegister(); },
     ),
   ];
 }
 
-class _Field extends StatelessWidget {
+class _Field extends StatefulWidget {
   final TextEditingController controller;
   final String label;
   final IconData icon;
   final bool obscure;
   final TextInputType? keyboard;
+  final VoidCallback? onSubmitted;
   const _Field({
     required this.controller, required this.label,
-    required this.icon, this.obscure = false, this.keyboard,
+    required this.icon, this.obscure = false, this.keyboard, this.onSubmitted,
   });
+
+  @override
+  State<_Field> createState() => _FieldState();
+}
+
+class _FieldState extends State<_Field> {
+  late bool _hidden = widget.obscure;
 
   @override
   Widget build(BuildContext context) {
     return TextField(
-      controller: controller,
-      obscureText: obscure,
-      keyboardType: keyboard,
+      controller: widget.controller,
+      obscureText: _hidden,
+      keyboardType: widget.keyboard,
+      onSubmitted: (_) => widget.onSubmitted?.call(),
+      textInputAction: widget.onSubmitted != null ? TextInputAction.done : TextInputAction.next,
       style: const TextStyle(color: Colors.white, fontSize: 14),
-      decoration: InputDecoration(
-        labelText: label,
+      decoration: _decoration(context),
+    );
+  }
+
+  InputDecoration _decoration(BuildContext context) => InputDecoration(
+        labelText: widget.label,
         labelStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
-        prefixIcon: Icon(icon, color: AppColors.textSecondary, size: 18),
+        prefixIcon: Icon(widget.icon, color: AppColors.textSecondary, size: 18),
+        suffixIcon: widget.obscure
+            ? IconButton(
+                icon: Icon(_hidden ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                    color: AppColors.textSecondary, size: 18),
+                onPressed: () => setState(() => _hidden = !_hidden),
+              )
+            : null,
         filled: true,
         fillColor: AppColors.bg,
         border: OutlineInputBorder(
@@ -285,7 +309,5 @@ class _Field extends StatelessWidget {
           borderSide: const BorderSide(color: AppColors.blueLight, width: 1.5),
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      ),
-    );
-  }
+      );
 }
