@@ -1038,7 +1038,6 @@ def _email_html(code):
       <div style="font-size:36px;font-weight:900;color:#22B14C;letter-spacing:8px;font-family:monospace">{code}</div>
     </div>
     <p style="font-size:12px;color:#6B7B95;margin:16px 0 0 0">Энэ код 10 минутын дараа хүчингүй болно.</p>
-    <p style="font-size:12px;color:#6B7B95;margin:8px 0 0 0">Хэрэв та бүртгүүлэх гэж байгаагүй бол энэ имэйлийг үл хайхрана уу.</p>
   </div>
   <p style="text-align:center;color:#6B7B95;font-size:11px;margin-top:20px">© 2025 SportBet MN</p>
 </body></html>"""
