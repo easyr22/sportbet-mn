@@ -57,10 +57,10 @@ class AuthService {
         Uri.parse('$_base/api/send-code'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': email}),
-      ).timeout(const Duration(seconds: 20));
+      ).timeout(const Duration(seconds: 60));
       return jsonDecode(res.body) as Map<String, dynamic>;
     } catch (e) {
-      return {'error': 'Сүлжээний алдаа: $e'};
+      return {'error': 'Сүлжээ удааширсан байна. Дахин оролдоно уу. ($e)'};
     }
   }
 
