@@ -151,7 +151,10 @@ class _Game {
   final String prompt;
   const _Game(this.name, this.provider, this.emoji, this.colors, this.prompt, {this.jackpot = false});
 
-  String get thumbnail => '';
+  String get thumbnail {
+    final seed = name.replaceAll(' ', '').toLowerCase();
+    return 'https://picsum.photos/seed/$seed/400/500?blur=2';
+  }
 }
 
 const _slotGames = [
@@ -246,11 +249,35 @@ class _GameTile extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              // Layer 1: rich diagonal gradient
+              // Layer 0: gradient placeholder (under the photo)
               Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [game.colors.first, game.colors.last, Colors.black87],
+                    stops: const [0.0, 0.55, 1.0],
+                    begin: Alignment.topLeft, end: Alignment.bottomRight,
+                  ),
+                ),
+              ),
+              // Layer 0.5: unique blurred photo background
+              Image.network(
+                game.thumbnail,
+                fit: BoxFit.cover,
+                loadingBuilder: (_, child, prog) {
+                  if (prog == null) return child;
+                  return const SizedBox.shrink();
+                },
+                errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+              ),
+              // Layer 1: theme color overlay (on top of photo)
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      game.colors.first.withOpacity(0.75),
+                      game.colors.last.withOpacity(0.7),
+                      Colors.black87,
+                    ],
                     stops: const [0.0, 0.55, 1.0],
                     begin: Alignment.topLeft, end: Alignment.bottomRight,
                   ),
