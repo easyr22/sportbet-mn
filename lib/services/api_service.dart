@@ -71,6 +71,30 @@ class ApiService {
     }
   }
 
+  static Future<Map<String, dynamic>?> placeBet({
+    required double stake,
+    required double totalOdds,
+    required List<Map<String, dynamic>> selections,
+  }) async {
+    try {
+      final res = await http
+          .post(
+            Uri.parse('$_base/api/place-bet'),
+            headers: _authHeaders,
+            body: jsonEncode({
+              'stake': stake,
+              'totalOdds': totalOdds,
+              'selections': selections,
+            }),
+          )
+          .timeout(_timeout);
+      return jsonDecode(res.body) as Map<String, dynamic>;
+    } catch (e) {
+      if (kDebugMode) print('[API] placeBet error: $e');
+      return {'error': 'Сервертэй холбогдож чадсангүй'};
+    }
+  }
+
   static Future<List<Map<String, dynamic>>> fetchTransactions() async {
     try {
       final res = await http

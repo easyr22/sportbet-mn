@@ -1209,6 +1209,32 @@ def get_tx():
     uname = _user_for_request()
     return jsonify({"transactions": users[uname]["transactions"][:50]})
 
+@app.route("/api/place-bet", methods=["POST"])
+def place_bet():
+    uname = _user_for_request()
+    data = request.get_json() or {}
+    stake = data.get("stake")
+    selections = data.get("selections", [])
+    total_odds = data.get("totalOdds", 1.0)
+    if not isinstance(stake, (int,float)) or stake <= 0:
+        return jsonify({"error":"Бооцооны дүн буруу"}), 400
+    if not selections:
+        return jsonify({"error":"Бооцооны өгөгдөл хоосон"}), 400
+    with bal_lock:
+        if stake > users[uname]["balance"]:
+            return jsonify({"error":"Үлдэгдэл хүрэлцэхгүй"}), 400
+        users[uname]["balance"] -= stake
+        cur = users[uname]["balance"]
+    desc = ", ".join(f"{s.get('homeTeam','?')} - {s.get('awayTeam','?')} ({s.get('optionLabel','?')})"
+                     for s in selections[:3])
+    if len(selections) > 3: desc += f" +{len(selections)-3}"
+    tx = {"id":f"bet_{int(time.time()*1000)}","type":"bet","amount":-stake,
+          "balance":cur,"timestamp":now_iso(),
+          "note":f"Бооцоо ×{round(total_odds,2)}: {desc}",
+          "potentialWin": round(stake * total_odds, 0)}
+    users[uname]["transactions"].insert(0, tx)
+    return jsonify({"success":True, "balance":cur, "potentialWin":tx["potentialWin"], "transaction":tx})
+
 @app.route("/api/live-events")
 def get_live():
     with _cache_lock: live=[e for e in _cache["events"] if e["isLive"]]

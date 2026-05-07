@@ -87,11 +87,32 @@ class BetProvider extends ChangeNotifier {
   }
 
   bool placeBet() {
+    // Sync version (kept for compat); fires backend call without waiting
     if (_betSlip.isEmpty || _stake > _balance || _stake <= 0) return false;
     _balance -= _stake;
+    final stakeCopy = _stake;
+    final oddsCopy = totalOdds;
+    final selsCopy = _betSlip.map((b) => {
+          'eventId': b.eventId,
+          'marketId': b.id,
+          'homeTeam': b.homeTeam,
+          'awayTeam': b.awayTeam,
+          'league': b.league,
+          'marketName': b.marketName,
+          'optionLabel': b.optionLabel,
+          'odds': b.odds,
+        }).toList();
     _betSlip.clear();
     _betPlaced = true;
     notifyListeners();
+    // Async backend sync
+    ApiService.placeBet(stake: stakeCopy, totalOdds: oddsCopy, selections: selsCopy)
+        .then((res) {
+      if (res != null && res['balance'] != null) {
+        _balance = (res['balance'] as num).toDouble();
+        notifyListeners();
+      }
+    });
     return true;
   }
 
