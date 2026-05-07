@@ -126,6 +126,52 @@ def flag_logo(emoji_flag):
 def _brand_avatar(initials, bg, fg="ffffff"):
     return f"https://ui-avatars.com/api/?name={initials}&background={bg}&color={fg}&size=120&bold=true&format=png&font-size=0.5"
 
+# NBA / hockey / NFL / MLB team logos with real brand colors
+TEAM_LOGOS = {
+    # NBA
+    "Boston Celtics":          _brand_avatar("BOS", "007A33"),
+    "LA Lakers":               _brand_avatar("LAL", "552583", "FDB927"),
+    "Los Angeles Lakers":      _brand_avatar("LAL", "552583", "FDB927"),
+    "Golden State Warriors":   _brand_avatar("GSW", "1D428A", "FFC72C"),
+    "Miami Heat":              _brand_avatar("MIA", "98002E", "F9A01B"),
+    "Denver Nuggets":          _brand_avatar("DEN", "0E2240", "FEC524"),
+    "Phoenix Suns":            _brand_avatar("PHX", "1D1160", "E56020"),
+    "New York Knicks":         _brand_avatar("NYK", "006BB6", "F58426"),
+    "Philadelphia 76ers":      _brand_avatar("PHI", "006BB6", "ED174C"),
+    "Minnesota Timberwolves":  _brand_avatar("MIN", "0C2340", "78BE20"),
+    "San Antonio Spurs":       _brand_avatar("SAS", "000000", "C4CED4"),
+    "Milwaukee Bucks":         _brand_avatar("MIL", "00471B", "EEE1C6"),
+    "Dallas Mavericks":        _brand_avatar("DAL", "00538C", "002B5E"),
+    "Chicago Bulls":           _brand_avatar("CHI", "CE1141"),
+    "Brooklyn Nets":           _brand_avatar("BKN", "000000"),
+    "Cleveland Cavaliers":     _brand_avatar("CLE", "860038", "FDBB30"),
+    # NHL
+    "Toronto Maple Leafs":     _brand_avatar("TOR", "00205B"),
+    "Montreal Canadiens":      _brand_avatar("MTL", "AF1E2D"),
+    "Boston Bruins":            _brand_avatar("BOS", "FFB81C", "000000"),
+    "New York Rangers":        _brand_avatar("NYR", "0038A8", "CE1126"),
+    "Edmonton Oilers":         _brand_avatar("EDM", "041E42", "FF4C00"),
+    "Calgary Flames":          _brand_avatar("CGY", "C8102E", "F1BE48"),
+    "Tampa Bay Lightning":     _brand_avatar("TBL", "002868"),
+    "Florida Panthers":        _brand_avatar("FLA", "041E42", "C8102E"),
+    # NFL
+    "Kansas City Chiefs":      _brand_avatar("KC", "E31837", "FFB81C"),
+    "Buffalo Bills":           _brand_avatar("BUF", "00338D", "C60C30"),
+    "San Francisco 49ers":     _brand_avatar("SF", "AA0000", "B3995D"),
+    "Dallas Cowboys":          _brand_avatar("DAL", "003594", "869397"),
+    "Philadelphia Eagles":     _brand_avatar("PHI", "004C54", "A5ACAF"),
+    "Green Bay Packers":       _brand_avatar("GB", "203731", "FFB612"),
+    # MLB
+    "New York Yankees":        _brand_avatar("NYY", "0C2340", "C4CED3"),
+    "Boston Red Sox":          _brand_avatar("BOS", "BD3039", "0C2340"),
+    "LA Dodgers":              _brand_avatar("LAD", "005A9C"),
+    "San Francisco Giants":    _brand_avatar("SF", "FD5A1E", "27251F"),
+    "Chicago Cubs":            _brand_avatar("CHC", "0E3386", "CC3433"),
+    "St. Louis Cardinals":     _brand_avatar("STL", "C41E3A", "FEDB00"),
+    "Houston Astros":          _brand_avatar("HOU", "002D62", "EB6E1F"),
+    "Texas Rangers":           _brand_avatar("TEX", "003278", "C0111F"),
+}
+
 ESPORTS_LOGOS = {
     # CS2 — yellow/red/blue brand identities
     "Natus Vincere":     _brand_avatar("N+V",   "FFE600", "000000"),
@@ -207,6 +253,12 @@ STRENGTH = {
     "LA Lakers":80,"Golden State Warriors":84,"Phoenix Suns":78,
     "New York Knicks":80,"Philadelphia 76ers":78,
     "Minnesota Timberwolves":82,"San Antonio Spurs":62,
+    # NBA
+    "Boston Celtics":90, "Miami Heat":82, "Denver Nuggets":86,
+    "LA Lakers":80, "Golden State Warriors":84, "Phoenix Suns":78,
+    "New York Knicks":80, "Philadelphia 76ers":78,
+    "Minnesota Timberwolves":82, "San Antonio Spurs":62,
+    "Milwaukee Bucks":85, "Dallas Mavericks":83,
     # Esports (sim)
     "T1":90,"Natus Vincere":85,"FaZe Clan":83,"G2 Esports":82,"Team Vitality":80,
     "Gen.G":86,"Team Liquid":78,"Cloud9":75,"Sentinels":78,"LOUD":80,"Paper Rex":77,
@@ -832,8 +884,8 @@ def gen_live_filler(sport, count, exclude_teams=None):
             "id": uid, "sportId": sport,
             "league": league, "country": country, "countryFlag": flag,
             "homeTeam": h, "awayTeam": a,
-            "homeLogo": gen_logo(h, "1e5a99"),
-            "awayLogo": gen_logo(a, "ff6b00"),
+            "homeLogo": TEAM_LOGOS.get(h) or gen_logo(h, "1e5a99"),
+            "awayLogo": TEAM_LOGOS.get(a) or gen_logo(a, "ff6b00"),
             "isLive": True, "homeScore": hs, "awayScore": as_,
             "minute": minute, "minuteStr": minute_str, "period": period,
             "startTime": datetime.now(timezone.utc).isoformat(),
