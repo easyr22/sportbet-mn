@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 import '../widgets/slot_machine.dart';
 import '../widgets/roulette.dart';
+import '../widgets/aviator.dart';
+import '../widgets/mines.dart';
 
 class TvGamesPage extends StatefulWidget {
   const TvGamesPage({super.key});
@@ -161,14 +163,18 @@ class _TvGameTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        final lname = g.name.toLowerCase();
-        if (lname.contains('roulette') || lname.contains('wheel')) {
-          showDialog(context: context, builder: (_) => RouletteDialog(gameName: g.name));
+        final n = g.name.toLowerCase();
+        Widget dialog;
+        if (n.contains('race') || n.contains('football')) {
+          dialog = AviatorDialog(gameName: g.name);
+        } else if (n.contains('cards') || n.contains('21')) {
+          dialog = MinesDialog(gameName: g.name);
+        } else if (n.contains('roulette') || n.contains('wheel')) {
+          dialog = RouletteDialog(gameName: g.name);
         } else {
-          showDialog(context: context, builder: (_) => SlotMachineDialog(
-            gameName: g.name, emoji: g.emoji, colors: g.colors,
-          ));
+          dialog = SlotMachineDialog(gameName: g.name, emoji: g.emoji, colors: g.colors);
         }
+        showDialog(context: context, builder: (_) => dialog);
       },
       child: Container(
       decoration: BoxDecoration(

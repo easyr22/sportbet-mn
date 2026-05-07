@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 import '../widgets/slot_machine.dart';
 import '../widgets/roulette.dart';
+import '../widgets/aviator.dart';
+import '../widgets/mines.dart';
 
 class CasinoPage extends StatelessWidget {
   final bool isLive;
@@ -277,13 +279,18 @@ class _GameTile extends StatelessWidget {
   }
 
   void _showComing(BuildContext context) {
-    final lname = game.name.toLowerCase();
-    if (lname.contains('roulette') || lname.contains('wheel')) {
-      showDialog(context: context, builder: (_) => RouletteDialog(gameName: game.name));
+    final n = game.name.toLowerCase();
+    Widget dialog;
+    if (n.contains('aviator') || n.contains('jetx') || n.contains('crash')) {
+      dialog = AviatorDialog(gameName: game.name);
+    } else if (n.contains('mines')) {
+      dialog = MinesDialog(gameName: game.name);
+    } else if (n.contains('roulette') || n.contains('wheel') || n.contains('crazy time') ||
+               n.contains('monopoly') || n.contains('dream catcher') || n.contains('mega')) {
+      dialog = RouletteDialog(gameName: game.name);
     } else {
-      showDialog(context: context, builder: (_) => SlotMachineDialog(
-        gameName: game.name, emoji: game.emoji, colors: game.colors,
-      ));
+      dialog = SlotMachineDialog(gameName: game.name, emoji: game.emoji, colors: game.colors);
     }
+    showDialog(context: context, builder: (_) => dialog);
   }
 }
