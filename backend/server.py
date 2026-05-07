@@ -1017,6 +1017,9 @@ from email.mime.multipart import MIMEMultipart
 
 SMTP_USER = os.environ.get("SMTP_USER", "")
 SMTP_PASS = os.environ.get("SMTP_PASS", "")
+BREVO_USER = os.environ.get("BREVO_USER", "")
+BREVO_KEY  = os.environ.get("BREVO_KEY", "")
+EMAIL_FROM = os.environ.get("EMAIL_FROM", "noreply@sportbet-mn.com")
 
 users = {}              # username -> {pw_hash, email, balance, transactions, created}
 sessions = {}           # token -> username
@@ -1060,8 +1063,26 @@ def _send_via_resend(to_email, code):
     except Exception as ex:
         return False, f"Resend exc: {ex}"
 
+def _send_via_brevo(to_email, code):
+    """Send via Brevo SMTP (port 587, STARTTLS) — works on Render free tier."""
+    if not BREVO_USER or not BREVO_KEY: return False, "no brevo creds"
+    try:
+        msg = MIMEMultipart("alternative")
+        msg["Subject"] = f"SportBet MN — Баталгаажуулах код: {code}"
+        msg["From"] = f"SportBet MN <{EMAIL_FROM}>"
+        msg["To"] = to_email
+        msg.attach(MIMEText(_email_html(code), "html"))
+        ctx = ssl.create_default_context()
+        with smtplib.SMTP("smtp-relay.brevo.com", 587, timeout=15) as s:
+            s.starttls(context=ctx)
+            s.login(BREVO_USER, BREVO_KEY)
+            s.send_message(msg)
+        return True, None
+    except Exception as ex:
+        return False, f"Brevo exc: {ex}"
+
 def _send_via_smtp(to_email, code, port, use_ssl):
-    """Try SMTP with given port (587 STARTTLS or 465 SSL)."""
+    """Try Gmail SMTP with given port."""
     if not SMTP_USER or not SMTP_PASS: return False, "no smtp creds"
     try:
         msg = MIMEMultipart("alternative")
@@ -1084,21 +1105,23 @@ def _send_via_smtp(to_email, code, port, use_ssl):
         return False, f"SMTP:{port} exc: {ex}"
 
 def send_verify_email(to_email, code):
-    """Send 6-digit code to user. Tries Resend HTTP API first, then SMTP fallbacks."""
-    # 1) Resend HTTP API (best for free hosting)
+    """Send 6-digit code. Tries Brevo (works on Render) → Resend → Gmail SMTP."""
+    # 1) Brevo SMTP (best for Render free tier — port 587 not blocked)
+    if BREVO_USER and BREVO_KEY:
+        ok, err = _send_via_brevo(to_email, code)
+        if ok: print(f"[mail] sent to {to_email} via Brevo"); return True, None
+        print(f"[mail] brevo failed: {err}")
+    # 2) Resend HTTP API
     if RESEND_KEY:
         ok, err = _send_via_resend(to_email, code)
         if ok: print(f"[mail] sent to {to_email} via Resend"); return True, None
         print(f"[mail] resend failed: {err}")
-    # 2) SMTP port 587 STARTTLS
+    # 3) Gmail SMTP fallback
     if SMTP_USER and SMTP_PASS:
         ok, err = _send_via_smtp(to_email, code, 587, use_ssl=False)
-        if ok: print(f"[mail] sent to {to_email} via SMTP:587"); return True, None
-        print(f"[mail] smtp 587 failed: {err}")
-        # 3) SMTP port 465 SSL
+        if ok: print(f"[mail] sent to {to_email} via Gmail SMTP:587"); return True, None
         ok, err = _send_via_smtp(to_email, code, 465, use_ssl=True)
-        if ok: print(f"[mail] sent to {to_email} via SMTP:465"); return True, None
-        print(f"[mail] smtp 465 failed: {err}")
+        if ok: print(f"[mail] sent to {to_email} via Gmail SMTP:465"); return True, None
         return False, err
     print(f"[DEV — no email config] code for {to_email}: {code}")
     return False, "Email үйлчилгээ тохируулагдаагүй"
