@@ -1065,21 +1065,38 @@ def _send_via_resend(to_email, code):
 
 def _send_via_brevo(to_email, code):
     """Send via Brevo SMTP (port 587, STARTTLS) — works on Render free tier."""
-    if not BREVO_USER or not BREVO_KEY: return False, "no brevo creds"
+    user = (BREVO_USER or "").strip()
+    key  = (BREVO_KEY or "").strip()
+    # Strip accidental "Value: " prefix or quotes that might appear in env
+    for prefix in ("Value:", "value:"):
+        if user.lower().startswith(prefix.lower()):
+            user = user[len(prefix):].strip()
+    user = user.strip('"').strip("'")
+    key  = key.strip('"').strip("'")
+    if not user or not key: return False, "no brevo creds"
+    sender = (EMAIL_FROM or "").strip() or user
     try:
         msg = MIMEMultipart("alternative")
         msg["Subject"] = f"SportBet MN — Баталгаажуулах код: {code}"
-        msg["From"] = f"SportBet MN <{EMAIL_FROM}>"
+        msg["From"] = f"SportBet MN <{sender}>"
         msg["To"] = to_email
         msg.attach(MIMEText(_email_html(code), "html"))
         ctx = ssl.create_default_context()
-        with smtplib.SMTP("smtp-relay.brevo.com", 587, timeout=15) as s:
+        with smtplib.SMTP("smtp-relay.brevo.com", 587, timeout=20) as s:
+            s.ehlo()
             s.starttls(context=ctx)
-            s.login(BREVO_USER, BREVO_KEY)
+            s.ehlo()
+            s.login(user, key)
             s.send_message(msg)
         return True, None
+    except smtplib.SMTPAuthenticationError as ex:
+        return False, f"Brevo AUTH FAIL ({ex.smtp_code}): {ex.smtp_error}"
+    except smtplib.SMTPRecipientsRefused as ex:
+        return False, f"Brevo recipient refused: {ex.recipients}"
+    except smtplib.SMTPSenderRefused as ex:
+        return False, f"Brevo sender refused ({ex.smtp_code}): {ex.smtp_error}"
     except Exception as ex:
-        return False, f"Brevo exc: {ex}"
+        return False, f"Brevo exc: {type(ex).__name__}: {ex}"
 
 def _send_via_smtp(to_email, code, port, use_ssl):
     """Try Gmail SMTP with given port."""
@@ -1179,11 +1196,11 @@ def send_code():
     if ok:
         return jsonify({"success":True,"message":"Баталгаажуулах код имэйл рүү илгээгдлээ"})
     else:
-        # Email send failed (e.g. unverified domain) — show code in UI as fallback
         return jsonify({
             "success":True,
             "message":"Имэйл илгээх боломжгүй байна. Туршилтын код:",
             "devCode":code,
+            "debug":(err or "")[:300],
         })
 
 @app.route("/api/register", methods=["POST"])
