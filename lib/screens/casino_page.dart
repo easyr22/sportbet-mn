@@ -46,7 +46,7 @@ class CasinoPage extends StatelessWidget {
               crossAxisCount: cols,
               crossAxisSpacing: 8,
               mainAxisSpacing: 8,
-              childAspectRatio: 0.85,
+              childAspectRatio: 0.78,
             ),
             itemCount: games.length,
             itemBuilder: (_, i) => _GameTile(game: games[i], isLive: isLive),
@@ -148,45 +148,84 @@ class _Game {
   final String name, provider, emoji;
   final List<Color> colors;
   final bool jackpot;
-  const _Game(this.name, this.provider, this.emoji, this.colors, {this.jackpot = false});
+  final String prompt;
+  const _Game(this.name, this.provider, this.emoji, this.colors, this.prompt, {this.jackpot = false});
+
+  String get thumbnail {
+    final p = Uri.encodeComponent(prompt);
+    final seed = name.hashCode.abs() % 99999;
+    return 'https://image.pollinations.ai/prompt/$p?width=400&height=500&seed=$seed&nologo=true&model=flux';
+  }
 }
 
 const _slotGames = [
-  _Game('Sweet Bonanza', 'Pragmatic', '🍭', [Color(0xFFEC407A), Color(0xFF7B1FA2)], jackpot: true),
-  _Game('Gates of Olympus', 'Pragmatic', '⚡', [Color(0xFF1E88E5), Color(0xFF6A1B9A)]),
-  _Game('Big Bass Bonanza', 'Pragmatic', '🎣', [Color(0xFF26A69A), Color(0xFF1565C0)]),
-  _Game('Wolf Gold', 'Pragmatic', '🐺', [Color(0xFF6D4C41), Color(0xFFFF6F00)]),
-  _Game('Book of Dead', 'Play\'n GO', '📜', [Color(0xFFFFC107), Color(0xFFE65100)]),
-  _Game('Reactoonz', 'Play\'n GO', '👽', [Color(0xFF7B1FA2), Color(0xFF00BCD4)], jackpot: true),
-  _Game('Starburst', 'NetEnt', '💎', [Color(0xFF00ACC1), Color(0xFFFF6F00)]),
-  _Game('Gonzo\'s Quest', 'NetEnt', '⚱️', [Color(0xFF8BC34A), Color(0xFF6D4C41)]),
-  _Game('Mega Moolah', 'Microgaming', '🦁', [Color(0xFFFFA000), Color(0xFFE65100)], jackpot: true),
-  _Game('Immortal Romance', 'Microgaming', '🧛', [Color(0xFF424242), Color(0xFFB71C1C)]),
-  _Game('Dead or Alive 2', 'NetEnt', '🤠', [Color(0xFF6D4C41), Color(0xFFE65100)]),
-  _Game('Bonanza Megaways', 'BTG', '⛏️', [Color(0xFF558B2F), Color(0xFFE65100)]),
-  _Game('Aviator', 'Spribe', '✈️', [Color(0xFFE53935), Color(0xFF1E1E1E)], jackpot: true),
-  _Game('JetX', 'SmartSoft', '🚀', [Color(0xFFE53935), Color(0xFF6A1B9A)]),
-  _Game('Mines', 'Spribe', '💣', [Color(0xFFFFA000), Color(0xFF424242)]),
-  _Game('Plinko', 'Spribe', '🟡', [Color(0xFF1E88E5), Color(0xFF7B1FA2)]),
-  _Game('Crazy Time', 'Evolution', '🎪', [Color(0xFFE91E63), Color(0xFF7B1FA2)], jackpot: true),
-  _Game('Sugar Rush', 'Pragmatic', '🍬', [Color(0xFFEC407A), Color(0xFFFFA000)]),
-  _Game('Fruit Party', 'Pragmatic', '🍓', [Color(0xFFEF5350), Color(0xFF66BB6A)]),
-  _Game('The Dog House', 'Pragmatic', '🐕', [Color(0xFFFFA726), Color(0xFF42A5F5)]),
+  _Game('Sweet Bonanza', 'Pragmatic', '🍭', [Color(0xFFEC407A), Color(0xFF7B1FA2)],
+      'casino slot game thumbnail Sweet Bonanza candy lollipops fruits, vibrant pink purple, vertical 2d game art', jackpot: true),
+  _Game('Gates of Olympus', 'Pragmatic', '⚡', [Color(0xFF1E88E5), Color(0xFF6A1B9A)],
+      'casino slot Gates of Olympus Greek god Zeus lightning, dark blue purple, vertical art'),
+  _Game('Big Bass Bonanza', 'Pragmatic', '🎣', [Color(0xFF26A69A), Color(0xFF1565C0)],
+      'casino slot Big Bass Bonanza fishing rod giant bass fish, water blue, vertical 2d art'),
+  _Game('Wolf Gold', 'Pragmatic', '🐺', [Color(0xFF6D4C41), Color(0xFFFF6F00)],
+      'casino slot Wolf Gold native american wolf moon canyon, golden orange, vertical 2d art'),
+  _Game('Book of Dead', 'Play\'n GO', '📜', [Color(0xFFFFC107), Color(0xFFE65100)],
+      'casino slot Book of Dead Egyptian explorer pyramid, gold yellow, vertical 2d art'),
+  _Game('Solar Queen', 'Playson', '☀️', [Color(0xFFFFD700), Color(0xFFE53935)],
+      'casino slot Solar Queen ancient Egyptian goddess sun, gold red dramatic, vertical 2d art', jackpot: true),
+  _Game('Aztec Gold', 'Playson', '🏛️', [Color(0xFFFFA000), Color(0xFF558B2F)],
+      'casino slot Aztec Gold pyramid temple jungle, gold green megaways style, vertical art'),
+  _Game('Crystal Crater', 'BGaming', '💎', [Color(0xFF1E88E5), Color(0xFF7B1FA2)],
+      'casino slot Crystal Crater shiny gems mountain, blue purple sparkle, vertical 2d art'),
+  _Game('Savanna King', 'Booming', '🦁', [Color(0xFFFFA000), Color(0xFF558B2F)],
+      'casino slot Savanna King African lion savannah safari, golden green, vertical 2d art'),
+  _Game('Captain\'s Bounty', 'NetEnt', '🏴‍☠️', [Color(0xFF6D4C41), Color(0xFF000000)],
+      'casino slot Captains Bounty pirate ship treasure chest, dark sea brown, vertical 2d art'),
+  _Game('Elvis Frog', 'BGaming', '🐸', [Color(0xFFFFEB3B), Color(0xFF1E1E1E)],
+      'casino slot Elvis Frog rock star frog Las Vegas, neon yellow black, vertical 2d art'),
+  _Game('Starburst', 'NetEnt', '💎', [Color(0xFF00ACC1), Color(0xFFFF6F00)],
+      'casino slot Starburst space cosmic gems neon, dark blue stars, vertical 2d art'),
+  _Game('Magical Amazon', 'Booming', '🌳', [Color(0xFF558B2F), Color(0xFFE91E63)],
+      'casino slot Magical Amazon warrior queen jungle, vibrant green pink, vertical 2d art'),
+  _Game('Book of Nefertiti', 'Reflex', '👑', [Color(0xFFFFD700), Color(0xFF1565C0)],
+      'casino slot Book of Nefertiti Egyptian queen pharaoh, gold blue, vertical 2d art'),
+  _Game('Aviator', 'Spribe', '✈️', [Color(0xFFE53935), Color(0xFF1E1E1E)],
+      'casino crash game Aviator red biplane airplane sky, dark dramatic, vertical 2d art', jackpot: true),
+  _Game('JetX', 'SmartSoft', '🚀', [Color(0xFFE53935), Color(0xFF6A1B9A)],
+      'casino crash game JetX rocket flying purple sky, neon, vertical 2d art'),
+  _Game('Mines', 'Spribe', '💣', [Color(0xFFFFA000), Color(0xFF424242)],
+      'casino mines game grid bombs diamonds, dark glowing yellow, vertical 2d art'),
+  _Game('Plinko', 'Spribe', '🟡', [Color(0xFF1E88E5), Color(0xFF7B1FA2)],
+      'casino Plinko game ball pegs pyramid neon, blue purple, vertical 2d art'),
+  _Game('Sugar Rush', 'Pragmatic', '🍬', [Color(0xFFEC407A), Color(0xFFFFA000)],
+      'casino slot Sugar Rush colorful candy sweet world, pink orange cute, vertical 2d art'),
+  _Game('Fruit Party', 'Pragmatic', '🍓', [Color(0xFFEF5350), Color(0xFF66BB6A)],
+      'casino slot Fruit Party fresh juicy fruits cherries grapes, vibrant red green, vertical 2d art'),
 ];
 
 const _liveCasinoGames = [
-  _Game('Lightning Roulette', 'Evolution', '🎯', [Color(0xFFE53935), Color(0xFFFFA000)]),
-  _Game('Crazy Time', 'Evolution', '🎪', [Color(0xFFE91E63), Color(0xFF7B1FA2)], jackpot: true),
-  _Game('Monopoly Live', 'Evolution', '🎲', [Color(0xFF42A5F5), Color(0xFFE53935)]),
-  _Game('Dream Catcher', 'Evolution', '🎡', [Color(0xFF7B1FA2), Color(0xFFE91E63)]),
-  _Game('Speed Baccarat', 'Evolution', '🃏', [Color(0xFF1565C0), Color(0xFF000000)]),
-  _Game('Blackjack VIP', 'Evolution', '♠️', [Color(0xFF2E7D32), Color(0xFF000000)]),
-  _Game('Auto Roulette', 'Pragmatic', '🎰', [Color(0xFFB71C1C), Color(0xFF424242)]),
-  _Game('Mega Wheel', 'Pragmatic', '🎡', [Color(0xFFE65100), Color(0xFF7B1FA2)]),
-  _Game('Sweet Bonanza CandyLand', 'Pragmatic', '🍭', [Color(0xFFEC407A), Color(0xFF42A5F5)], jackpot: true),
-  _Game('Texas Hold\'em', 'Evolution', '🎴', [Color(0xFF388E3C), Color(0xFF000000)]),
-  _Game('Sic Bo', 'Evolution', '🎲', [Color(0xFFE53935), Color(0xFFFFA000)]),
-  _Game('Deal or No Deal', 'Evolution', '💼', [Color(0xFFE65100), Color(0xFF1565C0)]),
+  _Game('Lightning Roulette', 'Evolution', '🎯', [Color(0xFFE53935), Color(0xFFFFA000)],
+      'live casino Lightning Roulette wheel electric purple background, dramatic, vertical art'),
+  _Game('Crazy Time', 'Evolution', '🎪', [Color(0xFFE91E63), Color(0xFF7B1FA2)],
+      'live casino Crazy Time TV game show wheel colorful, pink purple festive, vertical art', jackpot: true),
+  _Game('Monopoly Live', 'Evolution', '🎲', [Color(0xFF42A5F5), Color(0xFFE53935)],
+      'live casino Monopoly Live board game show wheel Mr Monopoly, blue red, vertical art'),
+  _Game('Dream Catcher', 'Evolution', '🎡', [Color(0xFF7B1FA2), Color(0xFFE91E63)],
+      'live casino Dream Catcher money wheel game show, vibrant purple pink, vertical art'),
+  _Game('Speed Baccarat', 'Evolution', '🃏', [Color(0xFF1565C0), Color(0xFF000000)],
+      'live casino Speed Baccarat playing cards green table dealer, blue dark, vertical art'),
+  _Game('Blackjack VIP', 'Evolution', '♠️', [Color(0xFF2E7D32), Color(0xFF000000)],
+      'live casino Blackjack VIP card table green felt elegant, dark luxury, vertical art'),
+  _Game('Baccarat First Person', 'Evolution', '👑', [Color(0xFFFFD700), Color(0xFF6D4C41)],
+      'live casino Baccarat First Person elegant table luxury, gold dark, vertical art'),
+  _Game('Football Studio', 'Evolution', '⚽', [Color(0xFF22B14C), Color(0xFFE53935)],
+      'live casino Football Studio game show soccer cards, green field red, vertical art'),
+  _Game('Mega Wheel', 'Pragmatic', '🎡', [Color(0xFFE65100), Color(0xFF7B1FA2)],
+      'live casino Mega Wheel spinning prize numbers, orange purple, vertical art'),
+  _Game('Sweet Bonanza CandyLand', 'Pragmatic', '🍭', [Color(0xFFEC407A), Color(0xFF42A5F5)],
+      'live casino CandyLand sweet candy game show host, pink blue, vertical art', jackpot: true),
+  _Game('Texas Hold\'em', 'Evolution', '🎴', [Color(0xFF388E3C), Color(0xFF000000)],
+      'live casino Texas Holdem poker chips cards table, green dark, vertical art'),
+  _Game('Sic Bo', 'Evolution', '🎲', [Color(0xFFE53935), Color(0xFFFFA000)],
+      'live casino Sic Bo three dice red gold table, dramatic chinese, vertical art'),
 ];
 
 class _GameTile extends StatelessWidget {
@@ -201,78 +240,103 @@ class _GameTile extends StatelessWidget {
       borderRadius: BorderRadius.circular(8),
       child: Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: game.colors,
-            begin: Alignment.topLeft, end: Alignment.bottomRight,
-          ),
           borderRadius: BorderRadius.circular(8),
           boxShadow: [
-            BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 6, offset: const Offset(0, 3)),
+            BoxShadow(color: Colors.black.withOpacity(0.4), blurRadius: 8, offset: const Offset(0, 4)),
           ],
         ),
-        child: Stack(
-          children: [
-            // Decorative background pattern
-            Positioned(
-              right: -10, bottom: -10,
-              child: Text(game.emoji,
-                  style: TextStyle(fontSize: 80, color: Colors.white.withOpacity(0.15))),
-            ),
-            // Content
-            Padding(
-              padding: const EdgeInsets.all(8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Top badges
-                  Row(
-                    children: [
-                      if (isLive)
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-                          decoration: BoxDecoration(
-                            color: AppColors.liveRed,
-                            borderRadius: BorderRadius.circular(2),
-                          ),
-                          child: const Text('LIVE',
-                              style: TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.w800)),
-                        ),
-                      if (game.jackpot)
-                        Container(
-                          margin: const EdgeInsets.only(left: 4),
-                          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFFFD700),
-                            borderRadius: BorderRadius.circular(2),
-                          ),
-                          child: const Text('JACKPOT',
-                              style: TextStyle(color: Colors.black, fontSize: 9, fontWeight: FontWeight.w800)),
-                        ),
-                    ],
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              // 1. Gradient placeholder (shows while AI image loads or if it fails)
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: game.colors,
+                    begin: Alignment.topLeft, end: Alignment.bottomRight,
                   ),
-                  const Spacer(),
-                  Text(game.emoji, style: const TextStyle(fontSize: 36)),
-                  const SizedBox(height: 4),
-                  Text(game.name,
-                      maxLines: 1, overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w800)),
-                  Text(game.provider,
-                      style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 9)),
-                  const SizedBox(height: 4),
-                  Container(
-                    height: 22,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.25),
-                      borderRadius: BorderRadius.circular(3),
-                    ),
-                    child: Text(isLive ? 'СУУЛТ ОЛОХ' : 'ТОГЛОХ',
-                        style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w800)),
-                  ),
-                ],
+                ),
+                alignment: Alignment.center,
+                child: Text(game.emoji,
+                    style: TextStyle(fontSize: 80, color: Colors.white.withOpacity(0.4))),
               ),
-            ),
-          ],
+              // 2. AI-generated game artwork
+              Image.network(
+                game.thumbnail,
+                fit: BoxFit.cover,
+                loadingBuilder: (_, child, prog) {
+                  if (prog == null) return child;
+                  return const SizedBox.shrink();
+                },
+                errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+              ),
+              // 3. Dark overlay at bottom for text readability
+              Positioned(
+                left: 0, right: 0, bottom: 0,
+                child: Container(
+                  height: 60,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Colors.transparent, Colors.black.withOpacity(0.85)],
+                      begin: Alignment.topCenter, end: Alignment.bottomCenter,
+                    ),
+                  ),
+                ),
+              ),
+              // 4. Top badges
+              Positioned(
+                top: 6, left: 6,
+                child: Row(
+                  children: [
+                    if (isLive)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: AppColors.liveRed,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                        child: const Text('LIVE',
+                            style: TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.w800)),
+                      ),
+                    if (game.jackpot) ...[
+                      if (isLive) const SizedBox(width: 4),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFFD700),
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                        child: const Text('JACKPOT',
+                            style: TextStyle(color: Colors.black, fontSize: 9, fontWeight: FontWeight.w800)),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              // 5. Bottom text
+              Positioned(
+                left: 8, right: 8, bottom: 6,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(game.name,
+                        maxLines: 1, overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Colors.white, fontSize: 12, fontWeight: FontWeight.w800,
+                          shadows: [Shadow(color: Colors.black, blurRadius: 4)],
+                        )),
+                    Text(game.provider,
+                        style: const TextStyle(
+                          color: Colors.white70, fontSize: 9,
+                          shadows: [Shadow(color: Colors.black, blurRadius: 4)],
+                        )),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
