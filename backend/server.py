@@ -1156,10 +1156,12 @@ def send_code():
     if ok:
         return jsonify({"success":True,"message":"Баталгаажуулах код имэйл рүү илгээгдлээ"})
     else:
-        # Dev fallback: return code in response so user can still test
-        if not SMTP_USER:
-            return jsonify({"success":True,"message":"Имэйл сервер тохируулагдаагүй. Код:","devCode":code})
-        return jsonify({"error":f"Имэйл илгээхэд алдаа: {err}"}), 500
+        # Email send failed (e.g. unverified domain) — show code in UI as fallback
+        return jsonify({
+            "success":True,
+            "message":"Имэйл илгээх боломжгүй байна. Туршилтын код:",
+            "devCode":code,
+        })
 
 @app.route("/api/register", methods=["POST"])
 def register():
