@@ -13,6 +13,7 @@ import 'promo_page.dart';
 import 'bingo_page.dart';
 import 'toto_page.dart';
 import 'tv_games_page.dart';
+import 'results_page.dart';
 
 class AppShell extends StatefulWidget {
   const AppShell({super.key});
@@ -77,7 +78,7 @@ class _AppShellState extends State<AppShell> {
     if (_page == 7) return const TvGamesPage();
     if (_page == 8) return const BingoPage();
     if (_page == 9) return const TotoPage();
-    if (_page == 10) return const ComingSoonPage(title: 'ҮР ДҮН', icon: Icons.assessment, subtitle: 'Тоглолтын архив удахгүй');
+    if (_page == 10) return const ResultsPage();
 
     // Default: Sports / Live
     return Row(

@@ -869,6 +869,26 @@ def fetch_real_odds():
 _cache={"events":[],"ts":0}
 _cache_lock=threading.Lock()
 
+# ───── Match duration tracking & results history ─────
+_event_seen = {}   # event_id -> first_seen_timestamp
+_results = []      # finished matches (newest first, max 300)
+_results_lock = threading.Lock()
+
+# How long a sport's match runs before finishing (seconds)
+SPORT_DURATION = {
+    "football":         8*60,
+    "basketball":       7*60,
+    "hockey":           7*60,
+    "baseball":         9*60,
+    "americanfootball": 8*60,
+    "tennis":           6*60,
+    "mma":              4*60,
+    "volleyball":       6*60,
+    "tabletennis":      4*60,
+    "badminton":        4*60,
+    "esports":          12*60,
+}
+
 def _event_key(h,a):
     return f"{h}_{a}".lower().replace(" ","_")
 
@@ -985,9 +1005,49 @@ def refresh_all():
             e["minuteStr"] = e.get("minuteStr") or "Map 1"
             e["period"] = e["minuteStr"]
 
+    # 6. FINISH MATCHES that have been running for too long
+    now = time.time()
+    finished_ids = []
+    for e in events:
+        eid = e["id"]
+        if eid not in _event_seen:
+            _event_seen[eid] = now
+        sp = e.get("sportId", "")
+        duration = SPORT_DURATION.get(sp, 8*60)
+        elapsed = now - _event_seen[eid]
+        if elapsed > duration:
+            finished_ids.append(eid)
+            # Push final score to results
+            final = dict(e)
+            final["isLive"] = False
+            final["finished"] = True
+            final["finishedAt"] = now_iso()
+            final["minuteStr"] = "ДУУССАН"
+            final["period"] = "FT"
+            with _results_lock:
+                _results.insert(0, final)
+                if len(_results) > 300:
+                    del _results[300:]
+            _event_seen.pop(eid, None)
+
+    if finished_ids:
+        events = [e for e in events if e["id"] not in finished_ids]
+        # Generate replacements per sport so live count stays high
+        from collections import Counter
+        finished_sports = Counter(
+            r["sportId"] for r in _results[:len(finished_ids)]
+        )
+        for sport, cnt in finished_sports.items():
+            replacements = gen_live_filler(sport, cnt)
+            for r in replacements:
+                _event_seen[r["id"]] = now  # mark as freshly seen
+            events += replacements
+
     with _cache_lock:
         _cache["events"]=events
         _cache["ts"]=time.time()
+    if finished_ids:
+        print(f"Finished {len(finished_ids)} matches → results history")
     print(f"Refresh: {len(events)} events (live={sum(1 for e in events if e['isLive'])}) | ESPN+{'PandaScore' if PANDASCORE_KEY else 'EsimSim'} | Odds={'real' if ODDS_API_KEY else 'generated'}")
 
 def _bg():
@@ -1360,6 +1420,15 @@ def get_all():
 def force_refresh():
     threading.Thread(target=refresh_all,daemon=True).start()
     return jsonify({"ok":True})
+
+@app.route("/api/results")
+def get_results():
+    sport = request.args.get("sport")
+    limit = int(request.args.get("limit", 100))
+    with _results_lock:
+        rs = list(_results)
+    if sport: rs = [r for r in rs if r.get("sportId")==sport]
+    return jsonify({"results": rs[:limit], "count": len(rs)})
 
 # ═══════════════════════════════════════════════════════
 #  STATIC FILES  (MUST be last)
