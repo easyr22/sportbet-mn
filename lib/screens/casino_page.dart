@@ -151,11 +151,7 @@ class _Game {
   final String prompt;
   const _Game(this.name, this.provider, this.emoji, this.colors, this.prompt, {this.jackpot = false});
 
-  String get thumbnail {
-    final p = Uri.encodeComponent(prompt);
-    final seed = name.hashCode.abs() % 99999;
-    return 'https://image.pollinations.ai/prompt/$p?width=400&height=500&seed=$seed&nologo=true&model=flux';
-  }
+  String get thumbnail => '';
 }
 
 const _slotGames = [
@@ -237,57 +233,90 @@ class _GameTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () => _showComing(context),
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BorderRadius.circular(10),
       child: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(10),
           boxShadow: [
-            BoxShadow(color: Colors.black.withOpacity(0.4), blurRadius: 8, offset: const Offset(0, 4)),
+            BoxShadow(color: game.colors.first.withOpacity(0.5), blurRadius: 12, offset: const Offset(0, 6)),
           ],
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(10),
           child: Stack(
             fit: StackFit.expand,
             children: [
-              // 1. Gradient placeholder (shows while AI image loads or if it fails)
+              // Layer 1: rich diagonal gradient
               Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: game.colors,
+                    colors: [game.colors.first, game.colors.last, Colors.black87],
+                    stops: const [0.0, 0.55, 1.0],
                     begin: Alignment.topLeft, end: Alignment.bottomRight,
                   ),
                 ),
-                alignment: Alignment.center,
+              ),
+              // Layer 2: scattered decorative emojis
+              Positioned(top: 18, right: -8,
                 child: Text(game.emoji,
-                    style: TextStyle(fontSize: 80, color: Colors.white.withOpacity(0.4))),
+                    style: TextStyle(fontSize: 38, color: Colors.white.withOpacity(0.18)))),
+              Positioned(bottom: 65, left: -10,
+                child: Transform.rotate(angle: -0.2,
+                  child: Text(game.emoji,
+                      style: TextStyle(fontSize: 32, color: Colors.white.withOpacity(0.13))))),
+              Positioned(top: 60, left: 30,
+                child: Text(game.emoji,
+                    style: TextStyle(fontSize: 22, color: Colors.white.withOpacity(0.1)))),
+              // Layer 3: BIG center emoji as the "art"
+              Positioned.fill(
+                child: Align(
+                  alignment: const Alignment(0, -0.15),
+                  child: Container(
+                    width: 92, height: 92,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: RadialGradient(
+                        colors: [Colors.white.withOpacity(0.4), Colors.transparent],
+                      ),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(game.emoji,
+                        style: const TextStyle(
+                          fontSize: 64,
+                          shadows: [Shadow(color: Colors.black54, blurRadius: 10)],
+                        )),
+                  ),
+                ),
               ),
-              // 2. AI-generated game artwork
-              Image.network(
-                game.thumbnail,
-                fit: BoxFit.cover,
-                loadingBuilder: (_, child, prog) {
-                  if (prog == null) return child;
-                  return const SizedBox.shrink();
-                },
-                errorBuilder: (_, __, ___) => const SizedBox.shrink(),
-              ),
-              // 3. Dark overlay at bottom for text readability
+              // Layer 4: shine highlight (top-left)
               Positioned(
-                left: 0, right: 0, bottom: 0,
+                top: 0, left: 0, right: 0,
                 child: Container(
-                  height: 60,
+                  height: 50,
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [Colors.transparent, Colors.black.withOpacity(0.85)],
+                      colors: [Colors.white.withOpacity(0.18), Colors.transparent],
                       begin: Alignment.topCenter, end: Alignment.bottomCenter,
                     ),
                   ),
                 ),
               ),
-              // 4. Top badges
+              // Layer 5: bottom dark fade for readability
               Positioned(
-                top: 6, left: 6,
+                left: 0, right: 0, bottom: 0,
+                child: Container(
+                  height: 80,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Colors.transparent, Colors.black.withOpacity(0.92)],
+                      begin: Alignment.topCenter, end: Alignment.bottomCenter,
+                    ),
+                  ),
+                ),
+              ),
+              // Layer 6: badges
+              Positioned(
+                top: 7, left: 7,
                 child: Row(
                   children: [
                     if (isLive)
@@ -308,30 +337,50 @@ class _GameTile extends StatelessWidget {
                           color: const Color(0xFFFFD700),
                           borderRadius: BorderRadius.circular(2),
                         ),
-                        child: const Text('JACKPOT',
+                        child: const Text('🔥 HOT',
                             style: TextStyle(color: Colors.black, fontSize: 9, fontWeight: FontWeight.w800)),
                       ),
                     ],
                   ],
                 ),
               ),
-              // 5. Bottom text
+              // Layer 7: provider stripe (top right)
               Positioned(
-                left: 8, right: 8, bottom: 6,
+                top: 7, right: 7,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                  child: Text(game.provider,
+                      style: const TextStyle(color: Colors.white70, fontSize: 8, fontWeight: FontWeight.w600)),
+                ),
+              ),
+              // Layer 8: title at bottom
+              Positioned(
+                left: 8, right: 8, bottom: 8,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(game.name,
-                        maxLines: 1, overflow: TextOverflow.ellipsis,
+                        maxLines: 2, overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                          color: Colors.white, fontSize: 12, fontWeight: FontWeight.w800,
+                          color: Colors.white, fontSize: 13, fontWeight: FontWeight.w900,
+                          height: 1.1,
                           shadows: [Shadow(color: Colors.black, blurRadius: 4)],
                         )),
-                    Text(game.provider,
-                        style: const TextStyle(
-                          color: Colors.white70, fontSize: 9,
-                          shadows: [Shadow(color: Colors.black, blurRadius: 4)],
-                        )),
+                    const SizedBox(height: 4),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: AppColors.accent,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                      child: Text(isLive ? 'СУУЛТ ОЛОХ' : 'ТОГЛОХ',
+                          style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.w800)),
+                    ),
                   ],
                 ),
               ),
