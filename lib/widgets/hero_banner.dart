@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
+import '../services/auth_service.dart';
+import 'auth_dialog.dart';
 
 class HeroBanner extends StatelessWidget {
   const HeroBanner({super.key});
@@ -47,14 +49,29 @@ class HeroBanner extends StatelessWidget {
                   const Text('Эхний хадгаламж дээрээ 300,000₮ хүртэл',
                       style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w500)),
                   const SizedBox(height: 14),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 9),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(4),
+                  Builder(
+                    builder: (ctx) => InkWell(
+                      onTap: () {
+                        if (AuthService.isLoggedIn) {
+                          ScaffoldMessenger.of(ctx).showSnackBar(const SnackBar(
+                            backgroundColor: AppColors.accent,
+                            content: Text('🎁 Та бонус авах эрхгүй — энэ нь зөвхөн шинэ хэрэглэгчдэд'),
+                            behavior: SnackBarBehavior.floating,
+                          ));
+                        } else {
+                          showDialog(context: ctx, builder: (_) => const AuthDialog(startOnRegister: true));
+                        }
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 9),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: const Text('БОНУС АВАХ',
+                            style: TextStyle(color: AppColors.blueDark, fontSize: 12, fontWeight: FontWeight.w800)),
+                      ),
                     ),
-                    child: const Text('БОНУС АВАХ',
-                        style: TextStyle(color: AppColors.blueDark, fontSize: 12, fontWeight: FontWeight.w800)),
                   ),
                 ],
               ),
@@ -219,14 +236,23 @@ class HeroBanner extends StatelessWidget {
               ],
             ),
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(4),
+          Builder(
+            builder: (ctx) => InkWell(
+              onTap: () {
+                if (!AuthService.isLoggedIn) {
+                  showDialog(context: ctx, builder: (_) => const AuthDialog(startOnRegister: true));
+                }
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: const Text('АВАХ',
+                    style: TextStyle(color: AppColors.blueDark, fontSize: 12, fontWeight: FontWeight.w800)),
+              ),
             ),
-            child: const Text('АВАХ',
-                style: TextStyle(color: AppColors.blueDark, fontSize: 12, fontWeight: FontWeight.w800)),
           ),
         ],
       ),

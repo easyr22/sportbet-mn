@@ -25,9 +25,12 @@ class TopBar extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Row(
             children: [
-              _MiniLink(Icons.phone_iphone, 'MOBILE'),
-              _MiniLink(Icons.notifications_none, 'МЭДЭГДЭЛ'),
-              _MiniLink(Icons.bar_chart, 'СТАТИСТИК'),
+              Builder(builder: (ctx) => _MiniLink(Icons.phone_iphone, 'MOBILE',
+                  onTap: () => showDialog(context: ctx, builder: (_) => const _MobileDialog()))),
+              Builder(builder: (ctx) => _MiniLink(Icons.notifications_none, 'МЭДЭГДЭЛ',
+                  onTap: () => showDialog(context: ctx, builder: (_) => const _NotificationsDialog()))),
+              Builder(builder: (ctx) => _MiniLink(Icons.bar_chart, 'СТАТИСТИК',
+                  onTap: () => showDialog(context: ctx, builder: (_) => const _StatsDialog()))),
               const Spacer(),
               const Text('30 days bonus',
                   style: TextStyle(color: AppColors.orange, fontSize: 11, fontWeight: FontWeight.w600)),
@@ -155,17 +158,244 @@ class TopBar extends StatelessWidget {
 class _MiniLink extends StatelessWidget {
   final IconData icon;
   final String label;
-  const _MiniLink(this.icon, this.label);
+  final VoidCallback? onTap;
+  const _MiniLink(this.icon, this.label, {this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 16),
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.only(right: 16),
+        child: Row(
+          children: [
+            Icon(icon, size: 13, color: AppColors.textSecondary),
+            const SizedBox(width: 4),
+            Text(label, style: const TextStyle(color: AppColors.textSecondary, fontSize: 11)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MobileDialog extends StatelessWidget {
+  const _MobileDialog();
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: AppColors.surface,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      child: Container(
+        width: 420,
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(children: [
+              const Icon(Icons.phone_iphone, color: AppColors.accent, size: 22),
+              const SizedBox(width: 8),
+              const Text('МОБАЙЛ АППЛИКЕЙШН',
+                  style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w800)),
+              const Spacer(),
+              IconButton(icon: const Icon(Icons.close, color: AppColors.textSecondary, size: 20),
+                  onPressed: () => Navigator.pop(context)),
+            ]),
+            const SizedBox(height: 8),
+            const Text('Утсан дээрээ аппликейшн шиг суулгах боломжтой',
+                style: TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+            const SizedBox(height: 18),
+            _PlatformBlock(
+              icon: '🍎', title: 'iOS / iPhone',
+              steps: ['1. Safari браузерт нээх',
+                      '2. Доорх ⤴ Share товч',
+                      '3. "Add to Home Screen"',
+                      '4. "Add" дарах'],
+            ),
+            const SizedBox(height: 14),
+            _PlatformBlock(
+              icon: '🤖', title: 'Android / Samsung',
+              steps: ['1. Chrome браузерт нээх',
+                      '2. Дээр баруун ⋮ цэс',
+                      '3. "Install app" эсвэл "Add to Home Screen"',
+                      '4. "Install" дарах'],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PlatformBlock extends StatelessWidget {
+  final String icon, title;
+  final List<String> steps;
+  const _PlatformBlock({required this.icon, required this.title, required this.steps});
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.bg,
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(children: [
+            Text(icon, style: const TextStyle(fontSize: 22)),
+            const SizedBox(width: 8),
+            Text(title,
+                style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700)),
+          ]),
+          const SizedBox(height: 8),
+          ...steps.map((s) => Padding(
+            padding: const EdgeInsets.only(left: 28, top: 2),
+            child: Text(s, style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+          )),
+        ],
+      ),
+    );
+  }
+}
+
+class _NotificationsDialog extends StatelessWidget {
+  const _NotificationsDialog();
+  @override
+  Widget build(BuildContext context) {
+    final notes = [
+      ('🎁', 'Бүртгүүлэхэд 50,000₮ бэлэг!', 'Имэйлээр баталгаажуулсны дараа автоматаар орно', '5 мин өмнө'),
+      ('🔥', 'Champions League эхэллээ', 'Real Madrid vs Barcelona — өндөр odds!', '12 мин өмнө'),
+      ('💰', '100% бонус — Эхний хадгаламж', 'Анхны deposit дээрээ 300,000₮ хүртэл', '1 цаг өмнө'),
+      ('⚡', 'Аккумулятор бонус идэвхтэй', '5+ тоглолттой акк дээр +10%', '3 цаг өмнө'),
+      ('🎮', 'Эспорт live тоглолт', 'CS2 IEM Katowice — одоо явагдаж байна', '4 цаг өмнө'),
+    ];
+    return Dialog(
+      backgroundColor: AppColors.surface,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      child: Container(
+        width: 420,
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(children: [
+              const Icon(Icons.notifications, color: AppColors.accent, size: 22),
+              const SizedBox(width: 8),
+              const Text('МЭДЭГДЭЛ',
+                  style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w800)),
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                decoration: BoxDecoration(color: AppColors.liveRed, borderRadius: BorderRadius.circular(8)),
+                child: Text('${notes.length}',
+                    style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w800)),
+              ),
+              const Spacer(),
+              IconButton(icon: const Icon(Icons.close, color: AppColors.textSecondary, size: 20),
+                  onPressed: () => Navigator.pop(context)),
+            ]),
+            const SizedBox(height: 8),
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxHeight: 400),
+              child: ListView(
+                shrinkWrap: true,
+                children: notes.map((n) => Container(
+                  margin: const EdgeInsets.only(bottom: 8),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppColors.bg,
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(n.$1, style: const TextStyle(fontSize: 24)),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(n.$2, style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w700)),
+                            const SizedBox(height: 2),
+                            Text(n.$3, style: const TextStyle(color: AppColors.textSecondary, fontSize: 11)),
+                            const SizedBox(height: 4),
+                            Text(n.$4, style: const TextStyle(color: AppColors.textMuted, fontSize: 10)),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                )).toList(),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _StatsDialog extends StatelessWidget {
+  const _StatsDialog();
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: AppColors.surface,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      child: Container(
+        width: 460,
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(children: [
+              const Icon(Icons.bar_chart, color: AppColors.accent, size: 22),
+              const SizedBox(width: 8),
+              const Text('САЙТЫН СТАТИСТИК',
+                  style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w800)),
+              const Spacer(),
+              IconButton(icon: const Icon(Icons.close, color: AppColors.textSecondary, size: 20),
+                  onPressed: () => Navigator.pop(context)),
+            ]),
+            const SizedBox(height: 12),
+            _StatRow(label: 'Идэвхтэй live тоглолт', value: '276+', color: AppColors.liveRed),
+            _StatRow(label: 'Спортын төрөл', value: '11', color: AppColors.accent),
+            _StatRow(label: 'Эспортын тэмцээн', value: '16', color: AppColors.blueLight),
+            _StatRow(label: 'Бүртгэлтэй хэрэглэгч', value: '${1200 + DateTime.now().day * 7}', color: AppColors.orange),
+            _StatRow(label: 'Өнөөдөр тавьсан бооцоо', value: '${4800 + DateTime.now().hour * 23}', color: AppColors.accent),
+            _StatRow(label: 'Хамгийн их хожилт (өчигдөр)', value: '4,500,000₮', color: AppColors.orange),
+            _StatRow(label: 'Сайт ажилласан хугацаа', value: '99.7%', color: AppColors.accent),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _StatRow extends StatelessWidget {
+  final String label, value;
+  final Color color;
+  const _StatRow({required this.label, required this.value, required this.color});
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: AppColors.bg,
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: AppColors.border),
+      ),
       child: Row(
         children: [
-          Icon(icon, size: 13, color: AppColors.textSecondary),
-          const SizedBox(width: 4),
-          Text(label, style: const TextStyle(color: AppColors.textSecondary, fontSize: 11)),
+          Expanded(child: Text(label, style: const TextStyle(color: AppColors.textSecondary, fontSize: 13))),
+          Text(value, style: TextStyle(color: color, fontSize: 14, fontWeight: FontWeight.w800)),
         ],
       ),
     );
