@@ -122,45 +122,46 @@ def flag_logo(emoji_flag):
     if not cps: return ""
     return f"https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/72x72/{cps}.png"
 
-# Clearbit logo API — fetches real company logos by domain. CORS-friendly, free, no key.
+# Clearbit logo API — for football clubs / business domains
 def clearbit(domain): return f"https://logo.clearbit.com/{domain}"
 
+# Wikimedia Commons PNG renders of SVG team logos — reliable for esports
+def wiki(path): return f"https://upload.wikimedia.org/wikipedia/{path}"
+
 ESPORTS_LOGOS = {
-    "Natus Vincere":     clearbit("navi.gg"),
-    "FaZe Clan":         clearbit("fazeclan.com"),
-    "G2 Esports":        clearbit("g2esports.com"),
-    "Team Vitality":     clearbit("vitality.gg"),
-    "Cloud9":            clearbit("cloud9.gg"),
-    "Team Liquid":       clearbit("teamliquid.net"),
-    "T1":                clearbit("t1.gg"),
-    "Gen.G":             clearbit("geng.gg"),
-    "Fnatic":            clearbit("fnatic.com"),
-    "Astralis":          clearbit("astralis.gg"),
-    "MOUZ":              clearbit("mouz.com"),
-    "ENCE":              clearbit("ence.gg"),
-    "Heroic":            clearbit("heroic.gg"),
-    "Sentinels":         clearbit("sentinels.gg"),
-    "NRG":               clearbit("nrg.gg"),
-    "LOUD":              clearbit("loud.gg"),
-    "Paper Rex":         clearbit("paperrex.com"),
-    "Team Spirit":       clearbit("teamspirit.gg"),
-    "Team Secret":       clearbit("teamsecret.gg"),
-    "OG":                clearbit("ogesports.gg"),
-    "PSG.LGD":           clearbit("psg-lgd.com"),
-    "Karmine Corp":      clearbit("karminecorp.fr"),
-    "Team BDS":          clearbit("team-bds.com"),
-    "JDG Gaming":        clearbit("jdgaming.com"),
-    "LNG Esports":       clearbit("lngesports.com"),
-    "100 Thieves":       clearbit("100thieves.com"),
-    "KT Rolster":        clearbit("ktrolster.com"),
-    "Tundra Esports":    clearbit("tundra.gg"),
-    "Evil Geniuses":     clearbit("evilgeniuses.gg"),
-    "Gaimin Gladiators": clearbit("gaiminglads.com"),
-    "DRX":               clearbit("drx.gg"),
-    "ZETA DIVISION":     clearbit("zetadivision.com"),
-    "BBL Esports":       clearbit("bblesports.com"),
-    "M80":               clearbit("m80.gg"),
-    "EDG":               clearbit("edgaming.com"),
+    "Natus Vincere":     wiki("en/thumb/e/e7/Natus_Vincere_2020_logo.svg/120px-Natus_Vincere_2020_logo.svg.png"),
+    "FaZe Clan":         wiki("en/thumb/8/82/FaZe_Clan_logo.svg/120px-FaZe_Clan_logo.svg.png"),
+    "G2 Esports":        wiki("en/thumb/1/13/G2_Esports_logo.svg/120px-G2_Esports_logo.svg.png"),
+    "Team Vitality":     wiki("en/thumb/4/4c/Team_Vitality_logo.svg/120px-Team_Vitality_logo.svg.png"),
+    "Cloud9":            wiki("en/thumb/f/f1/Cloud9_logo.svg/120px-Cloud9_logo.svg.png"),
+    "Team Liquid":       wiki("en/thumb/3/36/Team_Liquid_logo.svg/120px-Team_Liquid_logo.svg.png"),
+    "T1":                wiki("en/thumb/6/65/T1_(esports)_logo.svg/120px-T1_(esports)_logo.svg.png"),
+    "Gen.G":             wiki("commons/thumb/3/3c/Gen.G_logo.svg/120px-Gen.G_logo.svg.png"),
+    "Fnatic":            wiki("en/thumb/f/fa/Fnatic_logo.svg/120px-Fnatic_logo.svg.png"),
+    "Astralis":          wiki("en/thumb/8/87/Astralis_logo.svg/120px-Astralis_logo.svg.png"),
+    "MOUZ":              wiki("en/thumb/5/56/MOUZ_logo.svg/120px-MOUZ_logo.svg.png"),
+    "ENCE":              wiki("en/thumb/8/89/ENCE_eSports_logo.svg/120px-ENCE_eSports_logo.svg.png"),
+    "Heroic":            wiki("en/thumb/7/75/Heroic_(esports)_logo.svg/120px-Heroic_(esports)_logo.svg.png"),
+    "Sentinels":         wiki("en/thumb/2/26/Sentinels_logo.svg/120px-Sentinels_logo.svg.png"),
+    "NRG":               wiki("en/thumb/d/d6/NRG_Esports_logo.svg/120px-NRG_Esports_logo.svg.png"),
+    "LOUD":              wiki("commons/thumb/6/6b/LOUD_logo.svg/120px-LOUD_logo.svg.png"),
+    "Paper Rex":         wiki("en/thumb/3/30/Paper_Rex_logo.svg/120px-Paper_Rex_logo.svg.png"),
+    "Team Spirit":       wiki("en/thumb/8/85/Team_Spirit_logo.svg/120px-Team_Spirit_logo.svg.png"),
+    "Team Secret":       wiki("en/thumb/2/2a/Team_Secret_logo.svg/120px-Team_Secret_logo.svg.png"),
+    "OG":                wiki("en/thumb/d/d7/OG_(esports)_logo.svg/120px-OG_(esports)_logo.svg.png"),
+    "PSG.LGD":           wiki("en/thumb/2/22/PSG.LGD_logo.svg/120px-PSG.LGD_logo.svg.png"),
+    "Karmine Corp":      wiki("commons/thumb/3/30/Karmine_Corp_logo.svg/120px-Karmine_Corp_logo.svg.png"),
+    "Team BDS":          wiki("en/thumb/4/42/Team_BDS_logo.svg/120px-Team_BDS_logo.svg.png"),
+    "100 Thieves":       wiki("en/thumb/4/47/100_Thieves_logo.svg/120px-100_Thieves_logo.svg.png"),
+    "KT Rolster":        wiki("en/thumb/c/cb/KT_Rolster_logo.svg/120px-KT_Rolster_logo.svg.png"),
+    "Evil Geniuses":     wiki("en/thumb/8/8b/Evil_Geniuses_logo.svg/120px-Evil_Geniuses_logo.svg.png"),
+    "DRX":               wiki("en/thumb/8/89/DRX_logo.svg/120px-DRX_logo.svg.png"),
+    "EDG":               wiki("en/thumb/9/95/Edward_Gaming_logo.svg/120px-Edward_Gaming_logo.svg.png"),
+    "JDG Gaming":        wiki("en/thumb/9/9c/JDG_Intel_Esports_Club_logo.svg/120px-JDG_Intel_Esports_Club_logo.svg.png"),
+    "LNG Esports":       wiki("en/thumb/d/d4/LNG_Esports_logo.svg/120px-LNG_Esports_logo.svg.png"),
+    "Tundra Esports":    wiki("en/thumb/1/12/Tundra_Esports_logo.svg/120px-Tundra_Esports_logo.svg.png"),
+    "BBL Esports":       wiki("en/thumb/8/85/BBL_Esports_logo.svg/120px-BBL_Esports_logo.svg.png"),
+    "Gaimin Gladiators": wiki("en/thumb/9/95/Gaimin_Gladiators_logo.svg/120px-Gaimin_Gladiators_logo.svg.png"),
 }
 
 # ═══════════════════════════════════════════════════════
@@ -768,12 +769,15 @@ LIVE_FILLER_TEAMS = {
     ],
 }
 
-def gen_live_filler(sport, count):
-    """Generate live sim matches for a sport when ESPN data is sparse."""
+def gen_live_filler(sport, count, exclude_teams=None):
+    """Generate live sim matches for a sport. exclude_teams = set of team names already playing."""
     teams = LIVE_FILLER_TEAMS.get(sport, [])
     if not teams: return []
+    excl = exclude_teams or set()
     out = []
-    pool = list(teams); random.shuffle(pool)
+    pool = [(h,a,l,c,f) for (h,a,l,c,f) in teams if h not in excl and a not in excl]
+    if not pool: pool = list(teams)
+    random.shuffle(pool)
     for i in range(min(count, len(pool))):
         h, a, league, country, flag = pool[i]
         # Realistic live scores per sport
@@ -813,8 +817,9 @@ def gen_live_filler(sport, count):
             minute = 0
         else:
             continue
+        uid = f"livefill_{sport}_{h.replace(' ','')}_{a.replace(' ','')}".lower()
         out.append({
-            "id": f"livefill_{sport}_{i}", "sportId": sport,
+            "id": uid, "sportId": sport,
             "league": league, "country": country, "countryFlag": flag,
             "homeTeam": h, "awayTeam": a,
             "homeLogo": gen_logo(h, "1e5a99"),
@@ -935,9 +940,11 @@ def refresh_all():
     # 4. Live-gap filler — guarantee at least 4 live matches per major sport
     MIN_LIVE = 4
     for sport in ["football","basketball","hockey","baseball","americanfootball"]:
-        live_count = sum(1 for e in events if e["sportId"]==sport and e["isLive"])
+        active = [e for e in events if e["sportId"]==sport]
+        already = {e["homeTeam"] for e in active} | {e["awayTeam"] for e in active}
+        live_count = sum(1 for e in active if e["isLive"])
         if live_count < MIN_LIVE:
-            events += gen_live_filler(sport, MIN_LIVE - live_count)
+            events += gen_live_filler(sport, MIN_LIVE - live_count, exclude_teams=already)
 
     # 5. FORCE ALL MATCHES LIVE — convert any non-live event to live with simulated data
     for e in events:
@@ -1038,9 +1045,11 @@ def refresh_all():
             r["sportId"] for r in _results[:len(finished_ids)]
         )
         for sport, cnt in finished_sports.items():
-            replacements = gen_live_filler(sport, cnt)
+            active = [e for e in events if e["sportId"]==sport]
+            already = {e["homeTeam"] for e in active} | {e["awayTeam"] for e in active}
+            replacements = gen_live_filler(sport, cnt, exclude_teams=already)
             for r in replacements:
-                _event_seen[r["id"]] = now  # mark as freshly seen
+                _event_seen[r["id"]] = now
             events += replacements
 
     with _cache_lock:
