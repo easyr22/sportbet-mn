@@ -1152,10 +1152,57 @@ BREVO_USER = os.environ.get("BREVO_USER", "")
 BREVO_KEY  = os.environ.get("BREVO_KEY", "")
 EMAIL_FROM = os.environ.get("EMAIL_FROM", "noreply@sportbet-mn.com")
 
+import json as _json
+
 users = {}              # username -> {pw_hash, email, balance, transactions, created}
 sessions = {}           # token -> username
 pending_codes = {}      # email -> {code, expires_at, attempts}
 users_lock = threading.Lock()
+
+# Persist data to disk so it survives Render free-tier spin-downs
+_PENDING_FILE = os.path.join(os.path.dirname(__file__), "pending_codes.json")
+_USERS_FILE = os.path.join(os.path.dirname(__file__), "users.json")
+
+def _load_pending():
+    try:
+        if os.path.exists(_PENDING_FILE):
+            with open(_PENDING_FILE, "r", encoding="utf-8") as f:
+                data = _json.load(f)
+            now = time.time()
+            for k, v in data.items():
+                if v.get("expires_at", 0) > now:
+                    pending_codes[k] = v
+            print(f"[pending] loaded {len(pending_codes)} valid codes from disk")
+    except Exception as ex:
+        print(f"[pending] load error: {ex}")
+
+def _save_pending():
+    try:
+        with open(_PENDING_FILE, "w", encoding="utf-8") as f:
+            _json.dump(pending_codes, f)
+    except Exception as ex:
+        print(f"[pending] save error: {ex}")
+
+def _load_users():
+    try:
+        if os.path.exists(_USERS_FILE):
+            with open(_USERS_FILE, "r", encoding="utf-8") as f:
+                data = _json.load(f)
+            for k, v in data.items():
+                users[k] = v
+            print(f"[users] loaded {len(users)} users from disk")
+    except Exception as ex:
+        print(f"[users] load error: {ex}")
+
+def _save_users():
+    try:
+        with open(_USERS_FILE, "w", encoding="utf-8") as f:
+            _json.dump(users, f)
+    except Exception as ex:
+        print(f"[users] save error: {ex}")
+
+_load_pending()
+_load_users()
 
 EMAIL_RX = re.compile(r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$")
 
@@ -1320,9 +1367,10 @@ def send_code():
         code = f"{secrets.randbelow(1000000):06d}"
         pending_codes[email] = {
             "code": code,
-            "expires_at": time.time() + 600,  # 10 minutes
+            "expires_at": time.time() + 1800,  # 30 minutes
             "attempts": 0,
         }
+        _save_pending()
     ok, err = send_verify_email(email, code)
     if ok:
         return jsonify({"success":True,"message":"Баталгаажуулах код имэйл рүү илгээгдлээ"})
@@ -1370,6 +1418,8 @@ def register():
             "created": now_iso(),
         }
         pending_codes.pop(email, None)
+        _save_pending()
+        _save_users()
         token = secrets.token_urlsafe(32)
         sessions[token] = username
     return jsonify({"success":True,"token":token,"username":username,"email":email,"balance":50000.0})
@@ -1392,10 +1442,11 @@ def forgot_password():
     code = f"{secrets.randbelow(1000000):06d}"
     pending_codes[f"reset:{email}"] = {
         "code": code,
-        "expires_at": time.time() + 600,
+        "expires_at": time.time() + 1800,
         "attempts": 0,
         "username": target,
     }
+    _save_pending()
     ok, err = send_verify_email(email, code)
     if ok:
         return jsonify({"success":True,"message":"Сэргээх код имэйл рүү илгээгдлээ"})
@@ -1432,6 +1483,7 @@ def reset_password():
             return jsonify({"error":"Хэрэглэгч олдсонгүй"}), 404
         users[uname]["pw_hash"] = hash_pw(new_pw)
         pending_codes.pop(key, None)
+        _save_pending()
         token = secrets.token_urlsafe(32)
         sessions[token] = uname
     return jsonify({"success":True,"token":token,"username":uname,"message":"Нууц үг шинэчлэгдлээ"})
@@ -1481,6 +1533,7 @@ def deposit():
     tx={"id":f"tx_{int(time.time()*1000)}","type":"deposit","amount":amount,
         "balance":cur,"timestamp":now_iso(),"note":"Deposit хийсэн"}
     users[uname]["transactions"].insert(0,tx)
+    _save_users()
     return jsonify({"success":True,"balance":cur,"amount":amount,"transaction":tx})
 
 @app.route("/api/withdraw", methods=["POST"])
@@ -1497,6 +1550,7 @@ def withdraw():
     tx={"id":f"tx_{int(time.time()*1000)}","type":"withdraw","amount":amount,
         "balance":cur,"timestamp":now_iso(),"note":"Withdraw хийсэн"}
     users[uname]["transactions"].insert(0,tx)
+    _save_users()
     return jsonify({"success":True,"balance":cur,"amount":amount,"transaction":tx})
 
 @app.route("/api/transactions")
@@ -1528,6 +1582,7 @@ def place_bet():
           "note":f"Бооцоо ×{round(total_odds,2)}: {desc}",
           "potentialWin": round(stake * total_odds, 0)}
     users[uname]["transactions"].insert(0, tx)
+    _save_users()
     return jsonify({"success":True, "balance":cur, "potentialWin":tx["potentialWin"], "transaction":tx})
 
 @app.route("/api/live-events")
