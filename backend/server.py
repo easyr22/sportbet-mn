@@ -1759,7 +1759,7 @@ def ai_status():
         "groq_set": bool(GROQ_KEY),
         "anthropic_set": bool(ANTHROPIC_KEY),
         "active": "gemini" if GEMINI_KEY else ("groq" if GROQ_KEY else ("claude" if ANTHROPIC_KEY else "demo")),
-        "version": "v5-listmodels"
+        "version": "v6-gemini25"
     })
 
 @app.route("/api/ai/models")
@@ -1808,14 +1808,12 @@ def ai_chat():
             for m in _msgs:
                 role = "model" if m["role"] == "assistant" else "user"
                 contents.append({"role": role, "parts": [{"text": m["content"]}]})
-            # Try multiple model names — Google sometimes changes/deprecates names
+            # Models available as of 2026 — gemini-1.5-* deprecated
             models = [
-                "gemini-1.5-flash-latest",
-                "gemini-1.5-flash",
-                "gemini-1.5-flash-002",
-                "gemini-1.5-flash-8b-latest",
-                "gemini-2.0-flash-001",
-                "gemini-pro",
+                "gemini-2.5-flash",       # Newest, fastest stable
+                "gemini-2.0-flash",       # Reliable fallback
+                "gemini-flash-latest",    # Auto-latest
+                "gemini-2.0-flash-lite",  # Smallest, highest rate limits
             ]
             reply = None
             last_err = None
