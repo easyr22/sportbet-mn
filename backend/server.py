@@ -1681,8 +1681,19 @@ _DEMO_CHAT = [
     ("over under", "📈 Over/Under тайлбар:\n\nНийт гол/оноо тухайн тоогоос их (Over) эсвэл бага (Under) байна уу гэдгийг таамагладаг.\n\n• Over 2.5 голд — тоглолтонд 3+ гол орно\n• Under 2.5 голд — 0, 1, эсвэл 2 гол орно\n\nТоглолт маш довтолгооны шинжтэй бол Over-г сонгох нь ухаалаг байж болно. ⚽"),
     ("стратеги", "🧠 Бооцооны үндсэн стратегиуд:\n\n1. **Bankroll менежмент** — Нийт мөнгөнийхөө 2-5%-иас хэтрүүлж бооцоо тавьж болохгүй\n2. **Гэрийн давуу тал** — Гэртээ тоглодог баг дунджаар 60% давуу байдаг\n3. **Value bet** — Оддын бодит боломжоос өндөр үнэтэй байгааг сонго\n4. **Аккумулятор** — Олон тоглолт нэгтгэж өндөр хожил авах боломжтой"),
     ("strategi", "🧠 Бооцооны үндсэн стратегиуд:\n\n1. **Bankroll менежмент** — Нийт мөнгөнийхөө 2-5%-иас хэтрүүлж бооцоо тавьж болохгүй\n2. **Гэрийн давуу тал** — Гэртээ тоглодог баг дунджаар 60% давуу байдаг\n3. **Value bet** — Оддын бодит боломжоос өндөр үнэтэй байгааг сонго\n4. **Аккумулятор** — Олон тоглолт нэгтгэж өндөр хожил авах боломжтой"),
-    ("баг", "🏆 Та аль багийн тухай мэдэхийг хүсч байна вэ? Тодорхой багийн нэр хэлээрэй, би тэр багийн талаар мэдлэгтэй зүйлсийг хуваалцъя!"),
-    ("bag", "🏆 Та аль багийн тухай мэдэхийг хүсч байна вэ? Тодорхой багийн нэр хэлээрэй, би тэр багийн талаар мэдлэгтэй зүйлсийг хуваалцъя!"),
+    ("real madrid", "🏆 **Real Madrid CF** 🇪🇸\n\n• Үндэслэгдсэн: 1902 он\n• Стадион: Сантьяго Бернабеу (81,044 суудал)\n• Тренер: Carlo Ancelotti\n• Гол одод: Vinicius Jr, Bellingham, Mbappé, Rodrygo, Modric\n• La Liga аварга: 36 удаа (дэлхийд хамгийн их)\n• Champions League: 15 удаа (рекорд)\n• Сүүлийн ялалт: 2023/24 La Liga + UCL Double"),
+    ("manchester city", "🏆 **Manchester City FC** 🏴󠁧󠁢󠁥󠁮󠁧󠁿\n\n• Үндэслэгдсэн: 1880 он\n• Стадион: Etihad (53,400 суудал)\n• Тренер: Pep Guardiola\n• Гол одод: Haaland, De Bruyne, Foden, Rodri\n• Premier League аварга: 10 удаа (сүүлийн 4 жил дараалан 2021-2024)\n• Champions League: 1 удаа (2023)\n• Pep-ийн тактик: tiki-taka + high press"),
+    ("manchester united", "🔴 **Manchester United FC** 🏴󠁧󠁢󠁥󠁮󠁧󠁿\n\n• Үндэслэгдсэн: 1878 он\n• Стадион: Old Trafford (74,310 суудал)\n• Тренер: Erik ten Hag\n• Гол одод: Bruno Fernandes, Rashford, Garnacho\n• Premier League аварга: 20 удаа (рекорд)\n• Champions League: 3 удаа\n• Sir Alex Ferguson-ы өвлөгдсөн өв"),
+    ("barcelona", "🔵🔴 **FC Barcelona** 🇪🇸\n\n• Үндэслэгдсэн: 1899 он\n• Стадион: Camp Nou (105,000 суудал — шинэчлэгдэж байна)\n• Тренер: Hansi Flick\n• Гол одод: Lamine Yamal, Pedri, Gavi, Lewandowski\n• La Liga аварга: 27 удаа\n• Champions League: 5 удаа\n• La Masia академи — дэлхийн шилдэг"),
+    ("liverpool", "🔴 **Liverpool FC** 🏴󠁧󠁢󠁥󠁮󠁧󠁿\n\n• Үндэслэгдсэн: 1892 он\n• Стадион: Anfield (61,000 суудал)\n• Тренер: Arne Slot (Klopp-ын дараа)\n• Гол одод: Salah, Van Dijk, Alexander-Arnold\n• Premier League: 19 удаа аварга\n• Champions League: 6 удаа\n• 'You'll Never Walk Alone' уриа"),
+    ("arsenal", "⚪🔴 **Arsenal FC** 🏴󠁧󠁢󠁥󠁮󠁧󠁿\n\n• Үндэслэгдсэн: 1886 он\n• Стадион: Emirates (60,704 суудал)\n• Тренер: Mikel Arteta\n• Гол одод: Saka, Ødegaard, Saliba, Rice\n• Premier League: 13 удаа\n• 'Invincibles' (2003/04 ялагдалгүй улирал)\n• Залуу, чанартай баг"),
+    ("bayern", "🔴 **FC Bayern München** 🇩🇪\n\n• Үндэслэгдсэн: 1900 он\n• Стадион: Allianz Arena (75,000 суудал)\n• Тренер: Vincent Kompany\n• Гол одод: Kane, Musiala, Kimmich, Sané\n• Bundesliga: 33 удаа (рекорд)\n• Champions League: 6 удаа\n• Германы тэргүүлэх клуб"),
+    ("psg", "🔴🔵 **Paris Saint-Germain** 🇫🇷\n\n• Үндэслэгдсэн: 1970 он\n• Стадион: Parc des Princes (47,929 суудал)\n• Тренер: Luis Enrique\n• Гол одод: Dembélé, Doué, Hakimi\n• Ligue 1: 12 удаа аварга\n• Qatar Sports Investments эзэмшдэг\n• Champions League хүсэлтэй"),
+    ("faze", "🎮 **FaZe Clan** (CS2)\n\n• 2010 онд үүсгэсэн АНУ-н esports баг\n• Roster (2025):\n  - karrigan (IGL) 🇩🇰\n  - rain 🇳🇴\n  - frozen 🇸🇰\n  - broky 🇧🇦\n  - EliGE 🇺🇸\n• 2022 IEM Katowice болон BLAST Premier Spring Major аварга\n• Брэндийн хувьд хамгийн том esports баг"),
+    ("navi", "🎮 **NAVI (Natus Vincere)** 🇺🇦\n\n• 2009 онд үүсгэсэн Украин баг\n• CS2 одод: s1mple, electroNic, b1t, jL, w0nderful\n• PGL Stockholm Major 2021 аварга\n• Сүүлийн жилүүдэд хүчтэй хэлбэрт орсон\n• Dota2, Apex, Valorant тэнхимтэй"),
+    ("g2", "🎮 **G2 Esports** 🇩🇪\n\n• 2014 онд Carlos 'ocelote' Rodríguez үүсгэсэн\n• CS2 (NiKo, huNter, m0NESY) 2023 BLAST World Final аварга\n• LoL Европ дахь хамгийн амжилттай баг\n• Олон спорттой брэнд"),
+    ("баг", "🏆 Та аль багийн тухай мэдэхийг хүсч байна вэ? Тодорхой багийн нэр хэлээрэй (жишээ нь: Real Madrid, Manchester City, FaZe, NAVI)!"),
+    ("bag", "🏆 Та аль багийн тухай мэдэхийг хүсч байна вэ? Тодорхой багийн нэр хэлээрэй (жишээ нь: Real Madrid, Manchester City, FaZe, NAVI)!"),
     ("premier league", "🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League 2024/25:\n\nОдоогийн хүчтэй багууд:\n• **Manchester City** — Pep Guardiola-гийн тактикийн давуу тал\n• **Arsenal** — Залуу, эрч хүчтэй баг\n• **Liverpool** — Slot-ын удирдлагад өндөр бүтээмжтэй\n\nPL-д гэрийн давуу тал маш чухал үүрэг гүйцэтгэдэг!"),
     ("champions league", "🌍 Champions League:\n\nЕвропын хамгийн нэр хүндтэй клубын тэмцээн. Энэ улиралд:\n• Real Madrid — 15 удаагийн аварга\n• Manchester City — Залуу боловсон хүчин\n• Bayern Munich — Буклет хийх тэмцэгч\n\nCL тоглолтонд under 2.5 голын статистик өндөр байдаг."),
 ]
@@ -1748,7 +1759,7 @@ def ai_status():
         "groq_set": bool(GROQ_KEY),
         "anthropic_set": bool(ANTHROPIC_KEY),
         "active": "gemini" if GEMINI_KEY else ("groq" if GROQ_KEY else ("claude" if ANTHROPIC_KEY else "demo")),
-        "version": "v3-bugfix"
+        "version": "v4-multimodel"
     })
 
 @app.route("/api/ai/chat", methods=["POST"])
@@ -1777,17 +1788,34 @@ def ai_chat():
             for m in _msgs:
                 role = "model" if m["role"] == "assistant" else "user"
                 contents.append({"role": role, "parts": [{"text": m["content"]}]})
-            r = req.post(
-                f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={GEMINI_KEY}",
-                headers={"Content-Type": "application/json"},
-                json={
-                    "contents": contents,
-                    "systemInstruction": {"parts": [{"text": _AI_SYSTEM}]},
-                    "generationConfig": {"maxOutputTokens": 500, "temperature": 0.7},
-                },
-                timeout=20)
-            r.raise_for_status()
-            reply = r.json()["candidates"][0]["content"]["parts"][0]["text"]
+            # Try models in order: 2.0-flash first, fallback to 1.5-flash-8b (less contended)
+            models = ["gemini-2.0-flash", "gemini-1.5-flash-8b", "gemini-1.5-flash"]
+            reply = None
+            last_err = None
+            for model in models:
+                try:
+                    r = req.post(
+                        f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={GEMINI_KEY}",
+                        headers={"Content-Type": "application/json"},
+                        json={
+                            "contents": contents,
+                            "systemInstruction": {"parts": [{"text": _AI_SYSTEM}]},
+                            "generationConfig": {"maxOutputTokens": 500, "temperature": 0.7},
+                        },
+                        timeout=20)
+                    if r.status_code == 429:
+                        last_err = "429"
+                        continue
+                    r.raise_for_status()
+                    reply = r.json()["candidates"][0]["content"]["parts"][0]["text"]
+                    break
+                except Exception as _e:
+                    last_err = str(_e)
+                    continue
+            if reply is None:
+                if last_err and "429" in last_err:
+                    raise Exception("429 rate limit on all Gemini models")
+                raise Exception(last_err or "Gemini failed")
         elif GROQ_KEY:
             # Groq — үнэгүй Llama 3
             groq_msgs = [{"role": "system", "content": _AI_SYSTEM}] + messages
@@ -1812,12 +1840,13 @@ def ai_chat():
         return jsonify({"reply": reply})
     except Exception as ex:
         err = str(ex)
-        # Strip URLs that may contain API keys
         import re as _re
         safe_err = _re.sub(r'https?://\S+', '[URL]', err)
         print(f"[AI] chat error: {err}")
-        if "429" in err or "Too Many Requests" in err:
-            return jsonify({"reply": "⚠️ Хэт олон хүсэлт илгээсэн байна. 30 секунд хүлээгээд дахин оролдоно уу.", "demo": True})
+        if "429" in err or "Too Many Requests" in err or "rate limit" in err.lower():
+            # Fall back to smart demo instead of just showing error
+            demo_reply = _demo_chat_reply(user_text)
+            return jsonify({"reply": f"💤 AI ачаалал ихтэй байна, оронд нь:\n\n{demo_reply}", "demo": True})
         return jsonify({"reply": f"⚠️ AI алдаа: {safe_err[:150]}", "demo": True})
 
 @app.route("/api/ai/analyze", methods=["POST"])
