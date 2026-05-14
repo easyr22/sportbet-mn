@@ -1760,8 +1760,8 @@ def ai_chat():
     messages = messages[-20:]
     user_text = next((m["content"] for m in reversed(messages) if m["role"] == "user"), "")
 
-    if not ANTHROPIC_KEY:
-        # Demo mode — no API key needed
+    # If no AI key configured at all, fall back to demo mode
+    if not (GEMINI_KEY or GROQ_KEY or ANTHROPIC_KEY):
         return jsonify({"reply": _demo_chat_reply(user_text), "demo": True})
 
     try:
@@ -1816,8 +1816,7 @@ def ai_analyze():
     if not event:
         return jsonify({"error": "Тоглолтын мэдээлэл хоосон"}), 400
 
-    if not ANTHROPIC_KEY:
-        # Demo mode
+    if not (GEMINI_KEY or GROQ_KEY or ANTHROPIC_KEY):
         return jsonify({"analysis": _demo_analyze(event), "demo": True})
 
     home = event.get("homeTeam", "")
