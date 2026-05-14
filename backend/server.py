@@ -1748,7 +1748,7 @@ def ai_status():
         "groq_set": bool(GROQ_KEY),
         "anthropic_set": bool(ANTHROPIC_KEY),
         "active": "gemini" if GEMINI_KEY else ("groq" if GROQ_KEY else ("claude" if ANTHROPIC_KEY else "demo")),
-        "version": "v2-gemini"
+        "version": "v3-bugfix"
     })
 
 @app.route("/api/ai/chat", methods=["POST"])
