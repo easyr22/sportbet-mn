@@ -1806,8 +1806,13 @@ def ai_chat():
         return jsonify({"reply": reply})
     except Exception as ex:
         err = str(ex)
+        # Strip URLs that may contain API keys
+        import re as _re
+        safe_err = _re.sub(r'https?://\S+', '[URL]', err)
         print(f"[AI] chat error: {err}")
-        return jsonify({"reply": f"⚠️ API алдаа: {err[:200]}", "demo": True})
+        if "429" in err or "Too Many Requests" in err:
+            return jsonify({"reply": "⚠️ Хэт олон хүсэлт илгээсэн байна. 30 секунд хүлээгээд дахин оролдоно уу.", "demo": True})
+        return jsonify({"reply": f"⚠️ AI алдаа: {safe_err[:150]}", "demo": True})
 
 @app.route("/api/ai/analyze", methods=["POST"])
 def ai_analyze():
@@ -1884,6 +1889,7 @@ def ai_analyze():
     except Exception as ex:
         err = str(ex)
         print(f"[AI] analyze error: {err}")
+        # Fall back to demo analysis (don't leak URLs/keys)
         return jsonify({"analysis": _demo_analyze(event), "demo": True})
 
 # ═══════════════════════════════════════════════════════
