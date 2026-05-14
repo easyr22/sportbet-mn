@@ -1741,6 +1741,16 @@ def _demo_analyze(event: dict) -> str:
         f"⚠️ Энэ нь мэдээллийн зорилготой таамаглал бөгөөд баталгаагүй болно."
     )
 
+@app.route("/api/ai/status")
+def ai_status():
+    return jsonify({
+        "gemini_set": bool(GEMINI_KEY),
+        "groq_set": bool(GROQ_KEY),
+        "anthropic_set": bool(ANTHROPIC_KEY),
+        "active": "gemini" if GEMINI_KEY else ("groq" if GROQ_KEY else ("claude" if ANTHROPIC_KEY else "demo")),
+        "version": "v2-gemini"
+    })
+
 @app.route("/api/ai/chat", methods=["POST"])
 def ai_chat():
     data = request.get_json() or {}
