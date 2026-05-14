@@ -1759,8 +1759,28 @@ def ai_status():
         "groq_set": bool(GROQ_KEY),
         "anthropic_set": bool(ANTHROPIC_KEY),
         "active": "gemini" if GEMINI_KEY else ("groq" if GROQ_KEY else ("claude" if ANTHROPIC_KEY else "demo")),
-        "version": "v4-multimodel"
+        "version": "v5-listmodels"
     })
+
+@app.route("/api/ai/models")
+def ai_list_models():
+    """List available Gemini models for the current API key."""
+    if not GEMINI_KEY:
+        return jsonify({"error": "GEMINI_API_KEY not set"}), 400
+    try:
+        r = req.get(f"https://generativelanguage.googleapis.com/v1beta/models?key={GEMINI_KEY}", timeout=15)
+        r.raise_for_status()
+        data = r.json()
+        # Filter for generative models only
+        names = []
+        for m in data.get("models", []):
+            n = m.get("name", "").replace("models/", "")
+            methods = m.get("supportedGenerationMethods", [])
+            if "generateContent" in methods:
+                names.append(n)
+        return jsonify({"available_models": names, "count": len(names)})
+    except Exception as ex:
+        return jsonify({"error": str(ex)[:200]}), 500
 
 @app.route("/api/ai/chat", methods=["POST"])
 def ai_chat():
@@ -1788,8 +1808,15 @@ def ai_chat():
             for m in _msgs:
                 role = "model" if m["role"] == "assistant" else "user"
                 contents.append({"role": role, "parts": [{"text": m["content"]}]})
-            # Try models in order: 2.0-flash first, fallback to 1.5-flash-8b (less contended)
-            models = ["gemini-2.0-flash", "gemini-1.5-flash-8b", "gemini-1.5-flash"]
+            # Try multiple model names — Google sometimes changes/deprecates names
+            models = [
+                "gemini-1.5-flash-latest",
+                "gemini-1.5-flash",
+                "gemini-1.5-flash-002",
+                "gemini-1.5-flash-8b-latest",
+                "gemini-2.0-flash-001",
+                "gemini-pro",
+            ]
             reply = None
             last_err = None
             for model in models:
