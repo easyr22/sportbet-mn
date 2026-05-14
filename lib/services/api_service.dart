@@ -156,6 +156,41 @@ class ApiService {
     return [];
   }
 
+  // ──────────── AI ────────────
+  static Future<String> aiChat(List<Map<String, String>> messages) async {
+    try {
+      final res = await http
+          .post(
+            Uri.parse('$_base/api/ai/chat'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({'messages': messages}),
+          )
+          .timeout(const Duration(seconds: 30));
+      final data = jsonDecode(res.body) as Map<String, dynamic>;
+      if (data['error'] != null) return data['error'] as String;
+      return data['reply'] as String? ?? '';
+    } catch (e) {
+      return 'Сервертэй холбогдож чадсангүй';
+    }
+  }
+
+  static Future<String> aiAnalyze(Map<String, dynamic> event) async {
+    try {
+      final res = await http
+          .post(
+            Uri.parse('$_base/api/ai/analyze'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({'event': event}),
+          )
+          .timeout(const Duration(seconds: 30));
+      final data = jsonDecode(res.body) as Map<String, dynamic>;
+      if (data['error'] != null) return data['error'] as String;
+      return data['analysis'] as String? ?? '';
+    } catch (e) {
+      return 'Сервертэй холбогдож чадсангүй';
+    }
+  }
+
   // ──────────── Parser ────────────
   static List<SportEvent> _parseEvents(List<dynamic> raw) {
     return raw.map((e) => _parseEvent(e as Map<String, dynamic>)).toList();

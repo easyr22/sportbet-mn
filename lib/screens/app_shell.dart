@@ -14,6 +14,7 @@ import 'bingo_page.dart';
 import 'toto_page.dart';
 import 'tv_games_page.dart';
 import 'results_page.dart';
+import 'ai_chat_screen.dart';
 import '../widgets/winners_ticker.dart';
 import '../widgets/win_popup.dart';
 
@@ -84,6 +85,7 @@ class _AppShellState extends State<AppShell> {
     if (_page == 8) return const BingoPage();
     if (_page == 9) return const TotoPage();
     if (_page == 10) return const ResultsPage();
+    if (_page == 11) return const AiChatScreen();
 
     // Default: Sports / Live
     return Row(

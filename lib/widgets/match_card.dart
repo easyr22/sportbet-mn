@@ -5,6 +5,7 @@ import '../constants/app_colors.dart';
 import '../models/sport_event.dart';
 import '../models/bet_item.dart';
 import '../data/bet_provider.dart';
+import '../services/api_service.dart';
 
 class MatchCard extends StatelessWidget {
   final SportEvent event;
@@ -58,7 +59,9 @@ class MatchCard extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 6),
+                  _AiButton(event: event),
+                  const SizedBox(width: 6),
                   Container(
                     padding:
                         const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -344,6 +347,113 @@ class _InitialsAvatar extends StatelessWidget {
             fontWeight: FontWeight.bold,
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _AiButton extends StatefulWidget {
+  final SportEvent event;
+  const _AiButton({required this.event});
+
+  @override
+  State<_AiButton> createState() => _AiButtonState();
+}
+
+class _AiButtonState extends State<_AiButton> {
+  bool _loading = false;
+
+  Map<String, dynamic> _eventMap() {
+    final e = widget.event;
+    return {
+      'homeTeam': e.homeTeam,
+      'awayTeam': e.awayTeam,
+      'league': e.league,
+      'sportId': e.sportId,
+      'homeScore': e.homeScore,
+      'awayScore': e.awayScore,
+      'isLive': e.isLive,
+      'minuteStr': e.minute ?? '',
+      'markets': e.markets.map((m) => {
+        'name': m.name,
+        'options': m.options.map((o) => {'label': o.label, 'odds': o.odds}).toList(),
+      }).toList(),
+    };
+  }
+
+  Future<void> _analyze() async {
+    setState(() => _loading = true);
+    final analysis = await ApiService.aiAnalyze(_eventMap());
+    setState(() => _loading = false);
+    if (!mounted) return;
+    showDialog(
+      context: context,
+      builder: (_) => Dialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: Container(
+          width: 480,
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(children: [
+                const Icon(Icons.smart_toy, color: AppColors.accent, size: 20),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    '${widget.event.homeTeam} vs ${widget.event.awayTeam}',
+                    style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close, color: AppColors.textSecondary, size: 18),
+                  onPressed: () => Navigator.pop(context),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                ),
+              ]),
+              const SizedBox(height: 4),
+              Text('AI дүн шинжилгээ',
+                  style: const TextStyle(color: AppColors.accent, fontSize: 11)),
+              const SizedBox(height: 12),
+              const Divider(color: AppColors.border, height: 1),
+              const SizedBox(height: 12),
+              Text(analysis,
+                  style: const TextStyle(color: Colors.white, fontSize: 13, height: 1.6)),
+              const SizedBox(height: 12),
+              const Text('⚠️ Энэ нь мэдээллийн зорилготой таамаглал бөгөөд баталгааны шинж чанаргүй.',
+                  style: TextStyle(color: AppColors.textMuted, fontSize: 10)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: _loading ? null : _analyze,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+        decoration: BoxDecoration(
+          color: AppColors.accent.withOpacity(0.12),
+          borderRadius: BorderRadius.circular(4),
+          border: Border.all(color: AppColors.accent.withOpacity(0.4)),
+        ),
+        child: _loading
+            ? const SizedBox(
+                width: 12,
+                height: 12,
+                child: CircularProgressIndicator(strokeWidth: 1.5, color: AppColors.accent),
+              )
+            : const Text(
+                '🤖 AI',
+                style: TextStyle(color: AppColors.accent, fontSize: 10, fontWeight: FontWeight.w700),
+              ),
       ),
     );
   }

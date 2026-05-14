@@ -1,14 +1,12 @@
 {
-    "name": "SportBet MN — Спорт бооцоо",
-    "short_name": "SportBet MN",
+    "name": "sportbet_mn",
+    "short_name": "sportbet_mn",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0E1B2C",
-    "theme_color": "#1E5A99",
-    "description": "Бодит цагийн спортын бооцооны платформ — хөл бөмбөг, сагсан бөмбөг, эспорт, теннис",
-    "orientation": "any",
-    "lang": "mn",
-    "categories": ["sports", "entertainment"],
+    "background_color": "#0175C2",
+    "theme_color": "#0175C2",
+    "description": "A new Flutter project.",
+    "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
         {

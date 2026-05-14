@@ -24,8 +24,24 @@ CORS(app)
 # ═══════════════════════════════════════════════════════
 #  CONFIG — API key-үүдийг энд эсвэл environment variable-аар оруулна
 # ═══════════════════════════════════════════════════════
-PANDASCORE_KEY = os.environ.get("PANDASCORE_KEY", "")   # esports real data
-ODDS_API_KEY   = os.environ.get("ODDS_API_KEY",   "")   # real bookmaker odds
+PANDASCORE_KEY  = os.environ.get("PANDASCORE_KEY",  "")   # esports real data
+ODDS_API_KEY    = os.environ.get("ODDS_API_KEY",    "")   # real bookmaker odds
+ANTHROPIC_KEY   = os.environ.get("ANTHROPIC_API_KEY","")  # Claude AI
+GROQ_KEY        = os.environ.get("GROQ_API_KEY",    "")   # Groq (Llama 3) — free
+
+# Load .env file if exists
+_env_path = os.path.join(os.path.dirname(__file__), ".env")
+if os.path.exists(_env_path):
+    with open(_env_path, encoding="utf-8", errors="ignore") as _f:
+        for _line in _f:
+            _line = _line.strip()
+            if "=" in _line and not _line.startswith("#"):
+                _k, _v = _line.split("=", 1)
+                _k, _v = _k.strip(), _v.strip()
+                if _k and _v and not os.environ.get(_k):
+                    os.environ[_k] = _v
+    ANTHROPIC_KEY = os.environ.get("ANTHROPIC_API_KEY", ANTHROPIC_KEY)
+    GROQ_KEY      = os.environ.get("GROQ_API_KEY",      GROQ_KEY)
 
 # ═══════════════════════════════════════════════════════
 #  ESPN SPORT SOURCES  (API key хэрэггүй — бүгд үнэгүй)
@@ -1619,6 +1635,195 @@ def get_results():
     return jsonify({"results": rs[:limit], "count": len(rs)})
 
 # ═══════════════════════════════════════════════════════
+#  AI ENDPOINTS — Claude (Anthropic) + Demo fallback
+# ═══════════════════════════════════════════════════════
+_AI_SYSTEM = """Та SportBet MN — Монголын тэргүүлэх спортын бооцооны сайтын AI туслагч юм.
+Монгол хэлээр хариулна уу. Богино, тодорхой хариулт өгнө үү.
+
+Чи дараах зүйлс хийж чадна:
+- Тоглолтын үр дүн, статистик, багийн мэдээлэл тайлбарлах
+- Бооцооны одд, market тайлбарлах (1X2, over/under, BTS гэх мэт)
+- Тоглолтын таамаглал өгөх (энэ нь мэдээллийн зорилготой, баталгаагүй)
+- Бооцооны стратеги, зөвлөгөө өгөх
+- Спортын дүрэм тайлбарлах
+
+Хариулт 200 үгэнд багтаана уу. Emoji ашиглаж болно."""
+
+# ── Demo AI: API key байхгүй үед ажилладаг хариулт генератор ──────────
+_DEMO_CHAT = [
+    ("сайн", "Сайн байна уу! 👋 Би SportBet MN-ийн AI туслагч. Тоглолтын таамаглал, одд тайлбар, бооцооны зөвлөгөө өгөх боломжтой. Юу асуухыг хүсч байна вэ?"),
+    ("таамаглал", "📊 Тоглолтын таамаглал хийхдээ хэд хэдэн хүчин зүйлийг харгалзан үздэг:\n\n• Багуудын сүүлийн 5 тоглолтын үзүүлэлт\n• Гэрийн болон айлчлалын статистик\n• Шархадсан тоглогчдын мэдээлэл\n• Биечлэн тулгарсан түүх\n\nТодорхой тоглолт сонгоод асуугаарай! ⚽"),
+    ("одд", "💡 Одд гэж юу вэ?\n\nОдд нь таны бооцооны хожлын харьцааг илэрхийлнэ:\n• 1.50 одд = 1000₮ бооцоонд 1500₮ хожно\n• 2.00 одд = 1000₮ бооцоонд 2000₮ хожно\n• 3.00 одд = 1000₮ бооцоонд 3000₮ хожно\n\nОдд бага байх тусам тухайн үр дүн илүү боломжтой гэж үзэгдэнэ."),
+    ("1x2", "⚽ 1X2 market тайлбар:\n\n• **1** — Гэрийн баг ялна\n• **X** — Тэнцэнэ (draw)\n• **2** — Айлчлагч баг ялна\n\nЖишээ: Manchester City vs Arsenal тоглолтонд City-н ялалтын одд 1.65, тэнцэлд 3.80, Arsenal-д 5.20 байж болно."),
+    ("over under", "📈 Over/Under тайлбар:\n\nНийт гол/оноо тухайн тоогоос их (Over) эсвэл бага (Under) байна уу гэдгийг таамагладаг.\n\n• Over 2.5 голд — тоглолтонд 3+ гол орно\n• Under 2.5 голд — 0, 1, эсвэл 2 гол орно\n\nТоглолт маш довтолгооны шинжтэй бол Over-г сонгох нь ухаалаг байж болно. ⚽"),
+    ("стратеги", "🧠 Бооцооны үндсэн стратегиуд:\n\n1. **Bankroll менежмент** — Нийт мөнгөнийхөө 2-5%-иас хэтрүүлж бооцоо тавьж болохгүй\n2. **Гэрийн давуу тал** — Гэртээ тоглодог баг дунджаар 60% давуу байдаг\n3. **Value bet** — Оддын бодит боломжоос өндөр үнэтэй байгааг сонго\n4. **Аккумулятор** — Олон тоглолт нэгтгэж өндөр хожил авах боломжтой"),
+    ("баг", "🏆 Та аль багийн тухай мэдэхийг хүсч байна вэ? Тодорхой багийн нэр хэлээрэй, би тэр багийн талаар мэдлэгтэй зүйлсийг хуваалцъя!"),
+    ("premier league", "🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League 2024/25:\n\nОдоогийн хүчтэй багууд:\n• **Manchester City** — Pep Guardiola-гийн тактикийн давуу тал\n• **Arsenal** — Залуу, эрч хүчтэй баг\n• **Liverpool** — Slot-ын удирдлагад өндөр бүтээмжтэй\n\nPL-д гэрийн давуу тал маш чухал үүрэг гүйцэтгэдэг!"),
+    ("champions league", "🌍 Champions League:\n\nЕвропын хамгийн нэр хүндтэй клубын тэмцээн. Энэ улиралд:\n• Real Madrid — 15 удаагийн аварга\n• Manchester City — Залуу боловсон хүчин\n• Bayern Munich — Буклет хийх тэмцэгч\n\nCL тоглолтонд under 2.5 голын статистик өндөр байдаг."),
+]
+
+def _demo_chat_reply(user_text: str) -> str:
+    txt = user_text.lower()
+    for kw, reply in _DEMO_CHAT:
+        if kw in txt:
+            return reply
+    # Default smart-sounding reply
+    responses = [
+        f"📊 '{user_text}' талаар дараах мэдээлэл байна:\n\nСпортын бооцоонд хамгийн чухал зүйл бол мэдлэг дээр суурилсан шийдвэр гаргах явдал юм. Тоглолтын статистик, багуудын хэлбэр, гэрийн/айлчлалын давуу тал зэргийг харгалзаж үздэг.\n\nИлүү тодорхой асуулт тавьбал дэлгэрэнгүй хариулт өгье! 💡",
+        f"🤖 Таны асуулт:\n\n**{user_text}**\n\nЭнэ сэдвийн талаар: Спортын бооцоонд амжилттай байхын тулд дараах зүйлсийг анхаарна уу:\n• Багийн сүүлийн 5 тоглолтын хэлбэр\n• Тоглогчдын гэмтлийн мэдээлэл\n• Биечлэн тулгарсан статистик\n• Цаг агаар, тоглолтын нөхцөл\n\nАсуулт байвал үргэлжлүүлж асуугаарай! ⚽",
+        f"💬 Ойлголоо! '{user_text}' тухай:\n\nСпортын шинжилгээнд хамгийн найдвартай аргуудын нэг бол **статистикт суурилсан шийдвэр** гаргах явдал. Сэдрэлт дээр тулгуурлахаас зайлсхийх нь чухал.\n\nЦааш юу мэдэхийг хүсч байна? 🎯",
+    ]
+    return responses[hash(user_text) % len(responses)]
+
+def _demo_analyze(event: dict) -> str:
+    home = event.get("homeTeam", "Гэрийн баг")
+    away = event.get("awayTeam", "Айлчлагч баг")
+    sport = event.get("sportId", "football")
+    home_score = event.get("homeScore", 0)
+    away_score = event.get("awayScore", 0)
+    is_live = event.get("isLive", False)
+    markets = event.get("markets", [])
+
+    # Pick likely winner based on name hash (deterministic but looks smart)
+    h = abs(hash(home + away))
+    home_strength = 45 + (h % 20)
+    away_strength = 100 - home_strength
+    fav = home if home_strength >= away_strength else away
+    fav_pct = max(home_strength, away_strength)
+
+    score_line = f"Одоогийн байдал: {home} {home_score}:{away_score} {away} (Лайв)" if is_live else "Тоглолт эхлээгүй"
+
+    odds_line = ""
+    if markets:
+        m = markets[0]
+        opts = m.get("options", [])
+        if opts:
+            best = min(opts, key=lambda o: o.get("odds", 99))
+            odds_line = f"\n🔢 Хамгийн бага одд: **{best.get('label')} @ {best.get('odds')}** — энэ нь букмейкерийн хувьд хамгийн боломжтой үр дүн гэж үзэж байна."
+
+    sport_tip = {
+        "football": "⚽ Хөлбөмбөгт гэрийн баг дунджаар 60% давуу байдаг.",
+        "basketball": "🏀 Баскетболд оноо өндөр гарах тул Over/Under market-д анхаарал тавих нь зүйтэй.",
+        "tennis": "🎾 Теннист тоглогчдын гадаргуу дээрх амжилтыг харгалзах нь чухал.",
+        "esports": "🎮 Эспортод багийн сүүлийн patch дахь хэлбэр чухал үүрэг гүйцэтгэнэ.",
+    }.get(sport, "🏆 Тоглолтын шинжилгээнд статистик дээр тулгуур болоорой.")
+
+    return (
+        f"📊 **{home} vs {away}** — AI Шинжилгээ\n\n"
+        f"{score_line}\n\n"
+        f"🧠 **Таамаглал:** {fav} ялах боломж өндөртэй ({fav_pct}% итгэлтэй байдал){odds_line}\n\n"
+        f"{sport_tip}\n\n"
+        f"⚠️ Энэ нь мэдээллийн зорилготой таамаглал бөгөөд баталгаагүй болно."
+    )
+
+@app.route("/api/ai/chat", methods=["POST"])
+def ai_chat():
+    data = request.get_json() or {}
+    messages = data.get("messages", [])
+    if not messages:
+        return jsonify({"error": "Мессеж хоосон байна"}), 400
+    messages = messages[-20:]
+    user_text = next((m["content"] for m in reversed(messages) if m["role"] == "user"), "")
+
+    if not ANTHROPIC_KEY:
+        # Demo mode — no API key needed
+        return jsonify({"reply": _demo_chat_reply(user_text), "demo": True})
+
+    try:
+        if GROQ_KEY:
+            # Groq — үнэгүй Llama 3
+            groq_msgs = [{"role": "system", "content": _AI_SYSTEM}] + messages
+            r = req.post("https://api.groq.com/openai/v1/chat/completions",
+                headers={"Authorization": f"Bearer {GROQ_KEY}", "Content-Type": "application/json"},
+                json={"model": "llama-3.3-70b-versatile", "messages": groq_msgs, "max_tokens": 500},
+                timeout=20)
+            r.raise_for_status()
+            reply = r.json()["choices"][0]["message"]["content"]
+        elif ANTHROPIC_KEY:
+            import anthropic as _ant
+            client = _ant.Anthropic(api_key=ANTHROPIC_KEY)
+            resp = client.messages.create(
+                model="claude-3-5-haiku-20241022",
+                max_tokens=500,
+                system=_AI_SYSTEM,
+                messages=messages,
+            )
+            reply = resp.content[0].text
+        else:
+            return jsonify({"reply": _demo_chat_reply(user_text), "demo": True})
+        return jsonify({"reply": reply})
+    except Exception as ex:
+        err = str(ex)
+        print(f"[AI] chat error: {err}")
+        return jsonify({"reply": f"⚠️ API алдаа: {err[:200]}", "demo": True})
+
+@app.route("/api/ai/analyze", methods=["POST"])
+def ai_analyze():
+    data = request.get_json() or {}
+    event = data.get("event", {})
+    if not event:
+        return jsonify({"error": "Тоглолтын мэдээлэл хоосон"}), 400
+
+    if not ANTHROPIC_KEY:
+        # Demo mode
+        return jsonify({"analysis": _demo_analyze(event), "demo": True})
+
+    home = event.get("homeTeam", "")
+    away = event.get("awayTeam", "")
+    league = event.get("league", "")
+    sport = event.get("sportId", "")
+    home_score = event.get("homeScore", 0)
+    away_score = event.get("awayScore", 0)
+    is_live = event.get("isLive", False)
+    minute = event.get("minuteStr", "")
+    markets = event.get("markets", [])
+
+    markets_text = ""
+    for m in markets[:3]:
+        opts = ", ".join(f"{o['label']} ({o['odds']})" for o in m.get("options", []))
+        markets_text += f"  - {m['name']}: {opts}\n"
+
+    score_text = f"Одоогийн дүн: {home_score}:{away_score} ({minute})" if is_live else "Тоглолт эхлээгүй"
+    prompt = f"""Дараах тоглолтыг дүн шинжилгээ хий, богино таамаглал өг:
+
+Спорт: {sport} | Лиг: {league}
+Тоглолт: {home} vs {away}
+{score_text}
+
+Одд:
+{markets_text}
+
+Богино дүн шинжилгээ болон таамаглалаа монгол хэлээр өг. 150 үгэнд багтаа."""
+
+    try:
+        import anthropic as _ant
+        client = _ant.Anthropic(api_key=ANTHROPIC_KEY)
+        if GROQ_KEY:
+            groq_msgs = [{"role": "system", "content": _AI_SYSTEM},
+                         {"role": "user", "content": prompt}]
+            r = req.post("https://api.groq.com/openai/v1/chat/completions",
+                headers={"Authorization": f"Bearer {GROQ_KEY}", "Content-Type": "application/json"},
+                json={"model": "llama-3.3-70b-versatile", "messages": groq_msgs, "max_tokens": 400},
+                timeout=20)
+            r.raise_for_status()
+            analysis = r.json()["choices"][0]["message"]["content"]
+        elif ANTHROPIC_KEY:
+            import anthropic as _ant
+            client = _ant.Anthropic(api_key=ANTHROPIC_KEY)
+            resp = client.messages.create(
+                model="claude-3-5-haiku-20241022", max_tokens=400,
+                messages=[{"role": "user", "content": prompt}], system=_AI_SYSTEM,
+            )
+            analysis = resp.content[0].text
+        else:
+            return jsonify({"analysis": _demo_analyze(event), "demo": True})
+        return jsonify({"analysis": analysis})
+    except Exception as ex:
+        err = str(ex)
+        print(f"[AI] analyze error: {err}")
+        return jsonify({"analysis": _demo_analyze(event), "demo": True})
+
+# ═══════════════════════════════════════════════════════
 #  STATIC FILES  (MUST be last)
 # ═══════════════════════════════════════════════════════
 @app.route('/')
@@ -1630,10 +1835,14 @@ def static_files(path):
     except: return app.send_static_file('index.html')
 
 if __name__ == "__main__":
+    import sys
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     port = int(os.environ.get("PORT", 3001))
-    print("\nSportBet MN — Multi-source backend")
-    print(f"  ESPN:    бодит score (15+ спорт, key хэрэггүй)")
-    print(f"  Esports: {'PandaScore бодит' if PANDASCORE_KEY else 'Simulation'}")
-    print(f"  Odds:    {'The Odds API бодит' if ODDS_API_KEY else 'Generated'}")
+    print("\nSportBet MN - Multi-source backend")
+    print(f"  ESPN:    real scores (15+ sports, no key)")
+    print(f"  Esports: {'PandaScore real' if PANDASCORE_KEY else 'Simulation'}")
+    print(f"  Odds:    {'The Odds API real' if ODDS_API_KEY else 'Generated'}")
+    ai_mode = "Groq Llama3 (free)" if GROQ_KEY else ("Claude API" if ANTHROPIC_KEY else "Demo mode")
+    print(f"  AI:      {ai_mode}")
     print(f"  http://0.0.0.0:{port}\n")
     app.run(host="0.0.0.0", port=port, debug=False, threaded=True)

@@ -106,6 +106,7 @@ class TopBar extends StatelessWidget {
                       _NavTab('БИНГО',       8,  currentPage, onPageChanged),
                       _NavTab('TOTO',        9,  currentPage, onPageChanged),
                       _NavTab('ҮР ДҮН',      10, currentPage, onPageChanged),
+                      _NavTab('🤖 AI',       11, currentPage, onPageChanged),
                       _NavTab('ПРОФАЙЛ',     2,  currentPage, onPageChanged),
                     ],
                   ),
