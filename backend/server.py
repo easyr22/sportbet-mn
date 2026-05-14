@@ -1767,8 +1767,14 @@ def ai_chat():
     try:
         if GEMINI_KEY:
             # Gemini — үнэгүй
+            # Skip leading assistant messages (Gemini requires first message be from user)
+            _msgs = list(messages)
+            while _msgs and _msgs[0].get("role") != "user":
+                _msgs.pop(0)
+            if not _msgs:
+                return jsonify({"reply": "Юу асуухыг хүсч байна вэ?", "demo": False})
             contents = []
-            for m in messages:
+            for m in _msgs:
                 role = "model" if m["role"] == "assistant" else "user"
                 contents.append({"role": role, "parts": [{"text": m["content"]}]})
             r = req.post(
