@@ -28,6 +28,7 @@ PANDASCORE_KEY  = os.environ.get("PANDASCORE_KEY",  "")   # esports real data
 ODDS_API_KEY    = os.environ.get("ODDS_API_KEY",    "")   # real bookmaker odds
 ANTHROPIC_KEY   = os.environ.get("ANTHROPIC_API_KEY","")  # Claude AI
 GROQ_KEY        = os.environ.get("GROQ_API_KEY",    "")   # Groq (Llama 3) — free
+GEMINI_KEY      = os.environ.get("GEMINI_API_KEY",  "")   # Google Gemini — free
 
 # Load .env file if exists
 _env_path = os.path.join(os.path.dirname(__file__), ".env")
@@ -42,6 +43,7 @@ if os.path.exists(_env_path):
                     os.environ[_k] = _v
     ANTHROPIC_KEY = os.environ.get("ANTHROPIC_API_KEY", ANTHROPIC_KEY)
     GROQ_KEY      = os.environ.get("GROQ_API_KEY",      GROQ_KEY)
+    GEMINI_KEY    = os.environ.get("GEMINI_API_KEY",    GEMINI_KEY)
 
 # ═══════════════════════════════════════════════════════
 #  ESPN SPORT SOURCES  (API key хэрэггүй — бүгд үнэгүй)
@@ -1730,7 +1732,24 @@ def ai_chat():
         return jsonify({"reply": _demo_chat_reply(user_text), "demo": True})
 
     try:
-        if GROQ_KEY:
+        if GEMINI_KEY:
+            # Gemini — үнэгүй
+            contents = []
+            for m in messages:
+                role = "model" if m["role"] == "assistant" else "user"
+                contents.append({"role": role, "parts": [{"text": m["content"]}]})
+            r = req.post(
+                f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={GEMINI_KEY}",
+                headers={"Content-Type": "application/json"},
+                json={
+                    "contents": contents,
+                    "systemInstruction": {"parts": [{"text": _AI_SYSTEM}]},
+                    "generationConfig": {"maxOutputTokens": 500, "temperature": 0.7},
+                },
+                timeout=20)
+            r.raise_for_status()
+            reply = r.json()["candidates"][0]["content"]["parts"][0]["text"]
+        elif GROQ_KEY:
             # Groq — үнэгүй Llama 3
             groq_msgs = [{"role": "system", "content": _AI_SYSTEM}] + messages
             r = req.post("https://api.groq.com/openai/v1/chat/completions",
@@ -1798,7 +1817,19 @@ def ai_analyze():
     try:
         import anthropic as _ant
         client = _ant.Anthropic(api_key=ANTHROPIC_KEY)
-        if GROQ_KEY:
+        if GEMINI_KEY:
+            r = req.post(
+                f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={GEMINI_KEY}",
+                headers={"Content-Type": "application/json"},
+                json={
+                    "contents": [{"role": "user", "parts": [{"text": prompt}]}],
+                    "systemInstruction": {"parts": [{"text": _AI_SYSTEM}]},
+                    "generationConfig": {"maxOutputTokens": 400, "temperature": 0.7},
+                },
+                timeout=20)
+            r.raise_for_status()
+            analysis = r.json()["candidates"][0]["content"]["parts"][0]["text"]
+        elif GROQ_KEY:
             groq_msgs = [{"role": "system", "content": _AI_SYSTEM},
                          {"role": "user", "content": prompt}]
             r = req.post("https://api.groq.com/openai/v1/chat/completions",
@@ -1842,7 +1873,7 @@ if __name__ == "__main__":
     print(f"  ESPN:    real scores (15+ sports, no key)")
     print(f"  Esports: {'PandaScore real' if PANDASCORE_KEY else 'Simulation'}")
     print(f"  Odds:    {'The Odds API real' if ODDS_API_KEY else 'Generated'}")
-    ai_mode = "Groq Llama3 (free)" if GROQ_KEY else ("Claude API" if ANTHROPIC_KEY else "Demo mode")
+    ai_mode = "Gemini (free)" if GEMINI_KEY else ("Groq Llama3 (free)" if GROQ_KEY else ("Claude API" if ANTHROPIC_KEY else "Demo mode"))
     print(f"  AI:      {ai_mode}")
     print(f"  http://0.0.0.0:{port}\n")
     app.run(host="0.0.0.0", port=port, debug=False, threaded=True)
